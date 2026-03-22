@@ -549,17 +549,15 @@ export function DarktidleWordle() {
           <CardTitle className="text-base font-black tracking-widest text-primary">
             Briefing
           </CardTitle>
-          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
+          <p className="text-[10px] leading-relaxed text-muted-foreground">
             One cipher per local calendar day. Everyone gets the same answer for
             that date (length is four to seven glyphs). The grid starts at six
             rows and grows if you need more. Any word of the right length (A–Z)
             is accepted — letters may appear more than once in the answer and in
-            your guesses. After six guesses you may keep trying or use{" "}
-            <span className="text-destructive">Heresy</span> to see the answer
-            (five-minute input lock). You can still win afterward and keep your
-            streak. Green = correct place, amber = wrong place. Streaks break if
-            you skip a day or fail the puzzle without solving it — sign in to
-            sync streaks across devices.
+            your guesses. After six guesses you may keep trying or use REDACTED.
+            Green = correct, Amber = wrong position. Streaks break if you skip a
+            day or fail the puzzle without solving it — sign in to sync streaks
+            across devices.
           </p>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
@@ -588,8 +586,7 @@ export function DarktidleWordle() {
                   <span className="font-mono font-bold text-primary">
                     {solution}
                   </span>
-                  . When the lock lifts, you may still enter the winning word —
-                  your streak is not broken by Heresy alone.
+                  . Reflect until the lock lifts.
                 </p>
               </div>
             ) : null}
