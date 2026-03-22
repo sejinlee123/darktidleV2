@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-22T05:09:28.993408Z",
+  "generatedAt": "2026-03-22T06:09:28.968692Z",
   "count": 1524,
   "entries": [
     {
@@ -9,7 +9,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 1,
-      "text": "Grenade!"
+      "text": "Stand clear!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_2.mp3",
@@ -18,7 +18,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 2,
-      "text": "Grenade!"
+      "text": "Preaching!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_3.mp3",
@@ -27,7 +27,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 3,
-      "text": "Grenade out!"
+      "text": "Repositioning!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_4.mp3",
@@ -36,7 +36,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 4,
-      "text": "Last protocols engaged!"
+      "text": "Back!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_5.mp3",
@@ -45,7 +45,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 5,
-      "text": "Clearing the crowd!"
+      "text": "Get out!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_6.mp3",
@@ -54,7 +54,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 6,
-      "text": "inactive blast protocols!"
+      "text": "I move!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_7.mp3",
@@ -63,7 +63,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 7,
-      "text": "Throwing grenade!"
+      "text": "Back away!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Female_Break_8.mp3",
@@ -72,7 +72,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 8,
-      "text": "Grenade in play!"
+      "text": "Clearing the way!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Male_Break_1.mp3",
@@ -90,7 +90,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 2,
-      "text": "RENCHING!"
+      "text": "RIKCHING!"
     },
     {
       "path": "Arbites/Break/Arbites_A_Male_Break_3.mp3",
@@ -144,7 +144,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 8,
-      "text": "Tearing the way!"
+      "text": "Clearing the way!"
     },
     {
       "path": "Arbites/Break/Arbites_B_Female_Break_1.mp3",
@@ -153,7 +153,7 @@
       "variant": "B",
       "gender": "Female",
       "clipIndex": 1,
-      "text": "universe!"
+      "text": "!\""
     },
     {
       "path": "Arbites/Break/Arbites_B_Female_Break_2.mp3",
@@ -207,7 +207,7 @@
       "variant": "B",
       "gender": "Female",
       "clipIndex": 7,
-      "text": "STATUS!"
+      "text": "Sichuan Only"
     },
     {
       "path": "Arbites/Break/Arbites_B_Female_Break_8.mp3",
@@ -225,7 +225,7 @@
       "variant": "B",
       "gender": "Male",
       "clipIndex": 1,
-      "text": "SHOWER FLEEE!"
+      "text": "SHOWER FLEEE"
     },
     {
       "path": "Arbites/Break/Arbites_B_Male_Break_2.mp3",
@@ -243,7 +243,7 @@
       "variant": "B",
       "gender": "Male",
       "clipIndex": 3,
-      "text": "EGON!"
+      "text": "Ikan!"
     },
     {
       "path": "Arbites/Break/Arbites_B_Male_Break_4.mp3",
@@ -324,7 +324,7 @@
       "variant": "C",
       "gender": "Female",
       "clipIndex": 4,
-      "text": "// WOR РЕПОТ!"
+      "text": "Plare a path!"
     },
     {
       "path": "Arbites/Break/Arbites_C_Female_Break_5.mp3",
@@ -333,7 +333,7 @@
       "variant": "C",
       "gender": "Female",
       "clipIndex": 5,
-      "text": "BEGUN!"
+      "text": "Begone!"
     },
     {
       "path": "Arbites/Break/Arbites_C_Female_Break_6.mp3",
@@ -351,7 +351,7 @@
       "variant": "C",
       "gender": "Female",
       "clipIndex": 7,
-      "text": "Pow"
+      "text": "WHO? You"
     },
     {
       "path": "Arbites/Break/Arbites_C_Female_Break_8.mp3",
@@ -378,7 +378,7 @@
       "variant": "C",
       "gender": "Male",
       "clipIndex": 2,
-      "text": "Where?"
+      "text": "view"
     },
     {
       "path": "Arbites/Break/Arbites_C_Male_Break_3.mp3",
@@ -423,7 +423,7 @@
       "variant": "C",
       "gender": "Male",
       "clipIndex": 7,
-      "text": "phones"
+      "text": "phone"
     },
     {
       "path": "Arbites/Break/Arbites_C_Male_Break_8.mp3",
@@ -459,7 +459,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 3,
-      "text": "Edamond! Unyielding! Unstopable!"
+      "text": "Edamond! Unyielding! Unstoppable!"
     },
     {
       "path": "Arbites/Castigator/Arbites_A_Female_Castigator_4.mp3",
@@ -504,7 +504,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 8,
-      "text": "The likes always claim its price!"
+      "text": "The likes always claim this prize!"
     },
     {
       "path": "Arbites/Castigator/Arbites_A_Male_Castigator_1.mp3",
@@ -774,7 +774,7 @@
       "variant": "C",
       "gender": "Female",
       "clipIndex": 6,
-      "text": "Judgment will find you!"
+      "text": "Judgments will find you!"
     },
     {
       "path": "Arbites/Castigator/Arbites_C_Female_Castigator_7.mp3",
@@ -837,7 +837,7 @@
       "variant": "C",
       "gender": "Male",
       "clipIndex": 5,
-      "text": "I AM ADIMANGE!"
+      "text": "I am adamant!"
     },
     {
       "path": "Arbites/Castigator/Arbites_C_Male_Castigator_6.mp3",
@@ -873,7 +873,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 1,
-      "text": "Shock mine out!"
+      "text": "Grenade!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_2.mp3",
@@ -882,7 +882,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 2,
-      "text": "Shock mine in place!"
+      "text": "Grenade!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_3.mp3",
@@ -891,7 +891,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 3,
-      "text": "Out, passefaire de ploida!"
+      "text": "Grenade out!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_4.mp3",
@@ -900,7 +900,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 4,
-      "text": "DETTING CROWD PASSIFIER!"
+      "text": "Last protocols engaged!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_5.mp3",
@@ -909,7 +909,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 5,
-      "text": "SHOCKMINE IS DOWN!"
+      "text": "Clearing the crowd!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_6.mp3",
@@ -918,7 +918,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 6,
-      "text": "Controlling the crowd!"
+      "text": "in active blast protocols!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_7.mp3",
@@ -927,7 +927,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 7,
-      "text": "Setting mine!"
+      "text": "Throwing grenade!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Female_Grenade_8.mp3",
@@ -936,7 +936,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 8,
-      "text": "Mine, please!"
+      "text": "Grenade in play!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Male_Grenade_1.mp3",
@@ -945,7 +945,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 1,
-      "text": "Placeholder"
+      "text": "RENADE!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Male_Grenade_2.mp3",
@@ -990,7 +990,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 6,
-      "text": "Enacting blast protocols!"
+      "text": "Enixing blast protocols!"
     },
     {
       "path": "Arbites/Grenade/Arbites_A_Male_Grenade_7.mp3",
@@ -1062,7 +1062,7 @@
       "variant": "B",
       "gender": "Female",
       "clipIndex": 6,
-      "text": "THIS SHOULD EVEN THE ODS!"
+      "text": "This should even the odds!"
     },
     {
       "path": "Arbites/Grenade/Arbites_B_Female_Grenade_7.mp3",
@@ -1098,7 +1098,7 @@
       "variant": "B",
       "gender": "Male",
       "clipIndex": 2,
-      "text": "FNAF!"
+      "text": "Grenade 6"
     },
     {
       "path": "Arbites/Grenade/Arbites_B_Male_Grenade_3.mp3",
@@ -1134,7 +1134,7 @@
       "variant": "B",
       "gender": "Male",
       "clipIndex": 6,
-      "text": "This should even the odds!"
+      "text": "This shit even the odds!"
     },
     {
       "path": "Arbites/Grenade/Arbites_B_Male_Grenade_7.mp3",
@@ -1143,7 +1143,7 @@
       "variant": "B",
       "gender": "Male",
       "clipIndex": 7,
-      "text": "TREADY Throne!!"
+      "text": "Today's throne!"
     },
     {
       "path": "Arbites/Grenade/Arbites_C_Female_Grenade_1.mp3",
@@ -1251,7 +1251,7 @@
       "variant": "C",
       "gender": "Male",
       "clipIndex": 4,
-      "text": "Grenade!"
+      "text": "Some abs eenaid!"
     },
     {
       "path": "Arbites/Grenade/Arbites_C_Male_Grenade_5.mp3",
@@ -1269,7 +1269,7 @@
       "variant": "C",
       "gender": "Male",
       "clipIndex": 6,
-      "text": "Mendocid edict, fulmination!"
+      "text": "Medicated Edict, Fulmination!"
     },
     {
       "path": "Arbites/Grenade/Arbites_C_Male_Grenade_7.mp3",
@@ -1359,7 +1359,7 @@
       "variant": "A",
       "gender": "Female",
       "clipIndex": 8,
-      "text": "You have transgressed the holy lex!"
+      "text": "You have transgressed the holy legs!"
     },
     {
       "path": "Arbites/Howl/Arbites_A_Male_Howl_1.mp3",
@@ -1395,7 +1395,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 4,
-      "text": "Duty above all!"
+      "text": "Jiu-Jitsu Above All!"
     },
     {
       "path": "Arbites/Howl/Arbites_A_Male_Howl_5.mp3",
@@ -1404,7 +1404,7 @@
       "variant": "A",
       "gender": "Male",
       "clipIndex": 5,
-      "text": "I will find you scuff loss!"
+      "text": "I will find you, scuffloss!"
     },
     {
       "path": "Arbites/Howl/Arbites_A_Male_Howl_6.mp3",

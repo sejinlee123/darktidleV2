@@ -16,6 +16,8 @@ Run:
 Requires:
   - src/data/voice-manifest.json (run: pnpm voices:manifest)
   - public/Darktide_Voices/**/*.mp3
+  - FFmpeg on PATH (Whisper decodes .mp3 via ffmpeg). On Windows: install ffmpeg and
+    add it to PATH, or transcribe may fail with WinError 2 / file not found.
 """
 from __future__ import annotations
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 
 import { SiteHeader } from "@/components/SiteHeader";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
         >{`try{var m=window.matchMedia("(prefers-color-scheme: dark)");function s(){document.documentElement.classList.toggle("dark",m.matches);}s();m.addEventListener("change",s);}catch(e){}`}</Script>
         <SiteHeader />
         <main className="flex-1 w-full">{children}</main>
+        <Analytics />
       </body>
     </html>
   );
