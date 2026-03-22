@@ -46,30 +46,29 @@ export function HeardleHeresyConfirmDialog({
             <IconHeresySkull className="size-8 text-destructive" filled />
           </div>
           <DialogTitle className="font-black tracking-wide text-destructive">
-            Confess Heresy?
+            Heresy?
           </DialogTitle>
           <DialogDescription className="text-center text-sm leading-relaxed">
-            This ends the round as a{" "}
-            <span className="font-semibold text-foreground">loss</span>, resets
-            your Heardle streak, and seals this terminal for {lockPhrase}. You
-            can still use the rest of the site.
-          </DialogDescription>
+            Are you sure?
+            </DialogDescription>
         </DialogHeader>
         <DialogFooter className="border-t-0 bg-transparent p-0 pt-0 sm:flex-row sm:justify-center sm:gap-3">
           <Button
             type="button"
             variant="outline"
-            className="min-w-[7rem] font-semibold"
+            className="min-w-[7rem] font-black uppercase tracking-wider"
             disabled={pending}
+            aria-label="Cancel and keep playing"
             onClick={() => onOpenChange(false)}
           >
-            Stay loyal
+            Yes
           </Button>
           <Button
             type="button"
             variant="destructive"
             className="min-w-[7rem] gap-2 font-black uppercase tracking-wider"
             disabled={pending}
+            aria-label="Confess heresy"
             onClick={() => void onConfirm()}
           >
             {pending ? (
@@ -77,7 +76,7 @@ export function HeardleHeresyConfirmDialog({
             ) : (
               <>
                 <IconHeresySkull className="size-4 shrink-0" filled />
-                Confess
+                Yes!
               </>
             )}
           </Button>

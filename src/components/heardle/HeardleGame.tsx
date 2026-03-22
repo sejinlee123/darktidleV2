@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   IconAudioLines,
   IconHeart,
@@ -24,6 +30,11 @@ import {
   readGuestHeardleStreak,
   writeGuestHeardleStreak,
 } from "@/lib/heardle-guest-streak";
+import {
+  clearHeardleRound,
+  readHeardleRound,
+  writeHeardleRound,
+} from "@/lib/heardle-round-storage";
 import {
   formatCooldownRemaining,
   readHeresyCooldownUntil,
@@ -93,6 +104,7 @@ export function HeardleGame() {
 
   const [heresyDialogOpen, setHeresyDialogOpen] = useState(false);
   const [heresyDialogPending, setHeresyDialogPending] = useState(false);
+  const [roundHydrated, setRoundHydrated] = useState(false);
 
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
@@ -121,17 +133,60 @@ export function HeardleGame() {
     void refreshStats();
   }, [refreshStats, session?.user?.id]);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || sessionPending) return;
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+
     const g = readGuestHeardleStreak();
     setGuestCurrent(g.current);
     setGuestBest(g.best);
+
+    const r = readHeardleRound();
+    const quoteForPath = r
+      ? allQuotes.find((q) => q.clipPath === r.clipPath)
+      : undefined;
+
+    if (r && quoteForPath) {
+      setTargetQuote(quoteForPath);
+      setAttempts(r.attempts);
+      setGameState(r.gameState);
+      setStreakFailedGuesses(r.streakFailedGuesses);
+      syncedWinRef.current = r.gameState === "won";
+      syncedLossRef.current =
+        r.gameState === "lost" || r.gameState === "heresy";
+      setRoundHydrated(true);
+      return;
+    }
+
+    if (r) clearHeardleRound();
+
+    if (sessionPending) {
+      setRoundHydrated(true);
+      return;
+    }
+
     if (session?.user) {
       setStreakFailedGuesses([]);
     } else {
       setStreakFailedGuesses(g.failedGuesses);
     }
+    setRoundHydrated(true);
   }, [session?.user?.id, sessionPending]);
+
+  useEffect(() => {
+    if (!roundHydrated || !targetQuote) return;
+    writeHeardleRound({
+      clipPath: targetQuote.clipPath,
+      attempts,
+      gameState,
+      streakFailedGuesses,
+    });
+  }, [
+    roundHydrated,
+    targetQuote,
+    attempts,
+    gameState,
+    streakFailedGuesses,
+  ]);
 
   const refreshClipReactions = useCallback(async (clipPath: string) => {
     const res = await fetch("/api/clips/likes/batch", {
@@ -438,6 +493,7 @@ export function HeardleGame() {
 
   const restartRound = useCallback(
     (resetFailureLog: boolean) => {
+      clearHeardleRound();
       audioRef.current?.pause();
       setTargetQuote(pickRandomQuote());
       setAttempts([]);
