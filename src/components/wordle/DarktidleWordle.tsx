@@ -377,6 +377,28 @@ export function DarktidleWordle() {
     return () => window.removeEventListener("keydown", onDown);
   }, [commitGuess, keyHints, status, wordLength, serverLocked]);
 
+  /** Tile size + grid width scale with glyph count so 4-letter days feel roomy and 7-letter days still fit. */
+  const { gridMaxWidthRem, tileTextClass } = useMemo(() => {
+    const gapRem = 0.375;
+    let tileRem: number;
+    let text: string;
+    if (wordLength <= 4) {
+      tileRem = 3.5;
+      text = "text-xl sm:text-2xl";
+    } else if (wordLength === 5) {
+      tileRem = 3.125;
+      text = "text-lg sm:text-xl";
+    } else if (wordLength === 6) {
+      tileRem = 2.875;
+      text = "text-base sm:text-lg";
+    } else {
+      tileRem = 2.625;
+      text = "text-sm sm:text-base";
+    }
+    const maxW = wordLength * tileRem + (wordLength - 1) * gapRem;
+    return { gridMaxWidthRem: maxW, tileTextClass: text };
+  }, [wordLength]);
+
   const grid = useMemo(() => {
     const cells: {
       letter: string;
@@ -462,14 +484,17 @@ export function DarktidleWordle() {
 
           <div
             className={cn(
-              "mx-auto flex w-full max-w-[min(100%,22rem)] flex-col gap-1.5 sm:max-w-[26rem]",
+              "mx-auto flex w-full min-w-0 flex-col gap-1.5",
               shakeRow && "animate-wordle-shake",
             )}
+            style={{
+              maxWidth: `min(100%, ${gridMaxWidthRem}rem)`,
+            }}
           >
             {grid.map((row, ri) => (
               <div
                 key={ri}
-                className="grid gap-1.5"
+                className="grid min-w-0 gap-1.5"
                 style={{
                   gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))`,
                 }}
@@ -478,7 +503,8 @@ export function DarktidleWordle() {
                   <div
                     key={ci}
                     className={cn(
-                      "flex aspect-square max-h-14 items-center justify-center rounded-md text-lg font-black uppercase tracking-widest sm:max-h-16 sm:text-xl",
+                      "flex aspect-square min-h-0 w-full min-w-0 items-center justify-center rounded-md font-black uppercase tracking-widest",
+                      tileTextClass,
                       tileClasses(cell.tile, cell.revealed),
                     )}
                   >
