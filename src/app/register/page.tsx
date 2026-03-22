@@ -64,12 +64,6 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Register</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        Create an account stored in Postgres via Prisma. Run{" "}
-        <code className="text-xs">pnpm db:push</code> or{" "}
-        <code className="text-xs">pnpm db:migrate</code> after setting{" "}
-        <code className="text-xs">DATABASE_URL</code>.
-      </p>
 
       {error ? (
         <p

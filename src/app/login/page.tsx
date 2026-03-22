@@ -44,10 +44,6 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
       <h1 className="text-3xl font-semibold tracking-tight">Log in</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-        Sign in with Better Auth (email + password). Sessions use secure
-        cookies.
-      </p>
 
       {error ? (
         <p
