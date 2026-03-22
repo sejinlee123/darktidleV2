@@ -69,7 +69,7 @@ export default async function LeaderboardPage({
 
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [top3, pageRows, mine] = await Promise.all([
+  const [top3, pageRows] = await Promise.all([
     prisma.heardleLeaderboard.findMany({
       orderBy: leaderboardOrderBy,
       take: 3,
@@ -81,22 +81,9 @@ export default async function LeaderboardPage({
       take: PAGE_SIZE,
       include: leaderboardInclude,
     }),
-    session?.user?.id
-      ? prisma.heardleLeaderboard.findUnique({
-          where: { userId: session.user.id },
-          select: { bestStreak: true },
-        })
-      : Promise.resolve(null),
   ]);
 
-  let yourRank: number | null = null;
-  const yourBest = mine?.bestStreak ?? 0;
-  if (session?.user?.id && yourBest > 0) {
-    yourRank =
-      (await prisma.heardleLeaderboard.count({
-        where: { bestStreak: { gt: yourBest } },
-      })) + 1;
-  }
+  const myUserId = session?.user?.id ?? null;
 
   const rankRows = pageRows.map((r, i) => ({
     ...r,
@@ -116,14 +103,18 @@ export default async function LeaderboardPage({
 
       <div className="grid gap-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {top3.map((agent, i) => (
+          {top3.map((agent, i) => {
+            const isYou = myUserId != null && agent.userId === myUserId;
+            return (
             <Card
               key={agent.userId}
-              className={
+              className={cn(
                 i === 0
                   ? "border-primary/45 bg-card shadow-[0_0_18px_oklch(0.78_0.19_145_/_0.15)] ring-2 ring-primary/30"
-                  : "border-border bg-card ring-1 ring-border"
-              }
+                  : "border-border bg-card ring-1 ring-border",
+                isYou &&
+                  "bg-primary/12 shadow-[0_0_20px_oklch(0.78_0.19_145_/_0.2)] ring-2 ring-primary/60",
+              )}
             >
               <CardContent className="space-y-2 pt-6 text-center">
                 <div className="flex justify-center">
@@ -137,15 +128,23 @@ export default async function LeaderboardPage({
                     <IconMedal className="size-8 text-amber-700" />
                   ) : null}
                 </div>
-                <p className="text-lg font-black tracking-tight">
+                <p
+                  className={cn(
+                    "text-lg font-black tracking-tight",
+                    isYou &&
+                      "text-primary drop-shadow-[0_0_10px_oklch(0.78_0.19_145_/_0.35)]",
+                  )}
+                >
                   {displayName(agent.user)}
                 </p>
                 <div className="text-[10px] font-bold uppercase tracking-widest text-primary">
-                  Best {agent.bestStreak} // Current {agent.currentStreak}
+                  Best streak: {agent.bestStreak} · Current:{" "}
+                  {agent.currentStreak}
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
           {top3.length === 0 ? (
             <p className="col-span-full text-center text-sm text-muted-foreground">
               No rankings yet. Play Heardle while signed in to record a streak.
@@ -160,11 +159,14 @@ export default async function LeaderboardPage({
                 <IconTarget className="size-5 text-primary" />
                 <CardTitle className="text-xl">Grand archivists</CardTitle>
               </div>
-              {effectiveTotal > 0 ? (
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  Page {page} of {pageCount} · ranks 1–{effectiveTotal}
-                </p>
-              ) : null}
+              <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-4">
+                {effectiveTotal > 0 ? (
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                    Page {page} of {pageCount} · ranks 1–{effectiveTotal}
+                  </p>
+                ) : null}
+                <LeaderboardRefresh />
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -192,10 +194,16 @@ export default async function LeaderboardPage({
                       </td>
                     </tr>
                   ) : null}
-                  {rankRows.map((agent) => (
+                  {rankRows.map((agent) => {
+                    const isYou =
+                      myUserId != null && agent.userId === myUserId;
+                    return (
                     <tr
                       key={agent.userId}
-                      className="group transition-colors hover:bg-primary/10"
+                      className={cn(
+                        "group transition-colors hover:bg-primary/10",
+                        isYou && "bg-primary/15 hover:bg-primary/20",
+                      )}
                     >
                       <td className="px-6 py-4">
                         <span className="font-mono text-muted-foreground">
@@ -207,7 +215,12 @@ export default async function LeaderboardPage({
                           <div className="flex size-8 items-center justify-center rounded border border-border bg-muted/50 ring-1 ring-transparent transition-[box-shadow] group-hover:border-primary/35 group-hover:ring-primary/20">
                             <IconUser className="size-4 text-muted-foreground" />
                           </div>
-                          <span className="text-sm font-bold">
+                          <span
+                            className={cn(
+                              "text-sm font-bold",
+                              isYou && "text-primary drop-shadow-[0_0_8px_oklch(0.78_0.19_145_/_0.35)]",
+                            )}
+                          >
                             {displayName(agent.user)}
                           </span>
                         </div>
@@ -223,7 +236,8 @@ export default async function LeaderboardPage({
                         </span>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -262,22 +276,6 @@ export default async function LeaderboardPage({
             ) : null}
           </CardContent>
         </Card>
-
-        <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/8 p-4 ring-1 ring-primary/15 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="size-2 animate-pulse rounded-full bg-primary shadow-[0_0_8px_oklch(0.78_0.19_145_/_0.7)]" />
-            <span className="text-xs font-bold uppercase tracking-widest text-foreground">
-              {!session?.user
-                ? "Sign in to appear on the board"
-                : yourRank != null
-                  ? `Your ranking: #${yourRank} (best ${yourBest})`
-                  : yourBest === 0
-                    ? "Play Heardle to build your best streak"
-                    : `Your best streak: ${yourBest}`}
-            </span>
-          </div>
-          <LeaderboardRefresh />
-        </div>
       </div>
     </div>
   );
