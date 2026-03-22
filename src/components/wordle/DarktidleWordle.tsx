@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 /** First row index (0-based) at which extra guesses are allowed; Heresy is offered after this many commits. */
 const HERESY_OFFER_AFTER = 6;
 const MIN_GRID_ROWS_PLAYING = 6;
-const PENANCE_MS = 5 * 60 * 1000;
+const PENANCE_MS = 30 * 1000;
 
 function formatPenanceClock(ms: number) {
   const sec = Math.max(0, Math.ceil(ms / 1000));
@@ -648,8 +648,9 @@ export function DarktidleWordle() {
           status === "playing" &&
           !showPenanceOverlay ? (
             <p className="text-center text-sm font-semibold text-amber-600">
-              Heresy revealed the word:{" "}. Now reflect and penance.
-              <span className="font-mono text-primary">{solution}</span>.
+              Heresy revealed the word:{" "}
+              <span className="font-mono text-primary">{solution}</span>. You can
+              still win after the lock ends.
             </p>
           ) : null}
 

@@ -729,7 +729,7 @@ export function HeardleGame() {
             </div>
             {!loggedIn ? (
               <p className="text-center text-[10px] text-muted-foreground">
-                Sign in to register likes or heresy for this transmission.
+                Sign in to register likes/dislikes for this transmission.
               </p>
             ) : reactionLocked ? (
               <p className="text-center text-[10px] font-bold uppercase tracking-widest text-primary/90">
@@ -778,7 +778,7 @@ export function HeardleGame() {
                   onClick={() => void confessHeresy()}
                 >
                   <IconHeresySkull className="size-4 shrink-0" filled />
-                  Confess heresy
+                  HERESY
                 </Button>
               </div>
             ) : null}
