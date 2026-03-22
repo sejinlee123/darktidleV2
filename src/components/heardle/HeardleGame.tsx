@@ -8,6 +8,7 @@ import {
   IconPlay,
 } from "@/components/mission-icons";
 
+import { HeardleHeresyConfirmDialog } from "@/components/heardle/HeardleHeresyConfirmDialog";
 import { GuessInput, type Guess } from "@/components/heardle/GuessInput";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +25,6 @@ import {
   writeGuestHeardleStreak,
 } from "@/lib/heardle-guest-streak";
 import {
-  HERESY_COOLDOWN_MS,
   formatCooldownRemaining,
   readHeresyCooldownUntil,
   startHeresyCooldown,
@@ -90,6 +90,9 @@ export function HeardleGame() {
   });
   const [reactionsReady, setReactionsReady] = useState(false);
   const [reactionBusy, setReactionBusy] = useState(false);
+
+  const [heresyDialogOpen, setHeresyDialogOpen] = useState(false);
+  const [heresyDialogPending, setHeresyDialogPending] = useState(false);
 
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
@@ -202,18 +205,9 @@ export function HeardleGame() {
 
   const reactionLocked = reactions.liked || reactions.disliked;
 
-  const confessHeresy = useCallback(async () => {
-    if (gameState !== "playing" || !targetQuote) return;
-    if (attempts.length !== heresyAfterFailedCount) return;
-
-    const lockMinutes = Math.max(1, Math.round(HERESY_COOLDOWN_MS / 60_000));
-    if (
-      !window.confirm(
-        `Click confirm to be a heretic!`,
-      )
-    ) {
-      return;
-    }
+  const executeConfessHeresy = useCallback(async (): Promise<boolean> => {
+    if (gameState !== "playing" || !targetQuote) return false;
+    if (attempts.length !== heresyAfterFailedCount) return false;
 
     startHeresyCooldown();
     setClock(Date.now());
@@ -245,6 +239,7 @@ export function HeardleGame() {
       });
       setGuestCurrent(0);
     }
+    return true;
   }, [
     attempts.length,
     gameState,
@@ -252,6 +247,16 @@ export function HeardleGame() {
     streakFailedGuesses,
     targetQuote,
   ]);
+
+  const handleHeresyDialogConfirm = useCallback(async () => {
+    setHeresyDialogPending(true);
+    try {
+      const ok = await executeConfessHeresy();
+      if (ok) setHeresyDialogOpen(false);
+    } finally {
+      setHeresyDialogPending(false);
+    }
+  }, [executeConfessHeresy]);
 
   const submitHeardleLike = useCallback(async () => {
     if (!targetQuote) return;
@@ -449,6 +454,7 @@ export function HeardleGame() {
       }
       setGameState("playing");
       setIsPlaying(false);
+      setHeresyDialogOpen(false);
       syncedWinRef.current = false;
       syncedLossRef.current = false;
       setReactions({
@@ -481,6 +487,15 @@ export function HeardleGame() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6 p-4">
+      <HeardleHeresyConfirmDialog
+        open={heresyDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && heresyDialogPending) return;
+          setHeresyDialogOpen(open);
+        }}
+        onConfirm={handleHeresyDialogConfirm}
+        pending={heresyDialogPending}
+      />
       <div className="flex flex-wrap items-center justify-center gap-3 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
         <span className="rounded-md border border-primary/25 bg-primary/10 px-3 py-1.5 font-bold text-primary">
           Win streak: {displayCurrent}
@@ -785,7 +800,7 @@ export function HeardleGame() {
                   type="button"
                   variant="destructive"
                   className="gap-2 font-black uppercase tracking-wider"
-                  onClick={() => void confessHeresy()}
+                  onClick={() => setHeresyDialogOpen(true)}
                 >
                   <IconHeresySkull className="size-4 shrink-0" filled />
                   HERESY
