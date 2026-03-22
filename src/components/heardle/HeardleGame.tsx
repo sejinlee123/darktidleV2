@@ -733,7 +733,7 @@ export function HeardleGame() {
               className="focus-visible:ring-[3px] focus-visible:ring-red-500/45"
               onClick={() => restartRound(true)}
             >
-              Try again
+              {gameState === "heresy" ? "Continue" : "Try again"}
             </Button>
           </CardContent>
         </Card>

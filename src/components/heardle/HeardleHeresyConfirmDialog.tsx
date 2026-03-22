@@ -61,7 +61,7 @@ export function HeardleHeresyConfirmDialog({
             aria-label="Cancel and keep playing"
             onClick={() => onOpenChange(false)}
           >
-            Yes
+            No
           </Button>
           <Button
             type="button"
