@@ -24,6 +24,7 @@ import {
   writeGuestHeardleStreak,
 } from "@/lib/heardle-guest-streak";
 import {
+  HERESY_COOLDOWN_MS,
   formatCooldownRemaining,
   readHeresyCooldownUntil,
   startHeresyCooldown,
@@ -204,6 +205,15 @@ export function HeardleGame() {
   const confessHeresy = useCallback(async () => {
     if (gameState !== "playing" || !targetQuote) return;
     if (attempts.length !== heresyAfterFailedCount) return;
+
+    const lockMinutes = Math.max(1, Math.round(HERESY_COOLDOWN_MS / 60_000));
+    if (
+      !window.confirm(
+        `Click confirm to be a heretic!`,
+      )
+    ) {
+      return;
+    }
 
     startHeresyCooldown();
     setClock(Date.now());
