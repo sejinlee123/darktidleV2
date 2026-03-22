@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   }
   const gc =
     typeof guessCount === "number" && Number.isFinite(guessCount)
-      ? Math.max(1, Math.min(6, Math.floor(guessCount)))
+      ? Math.max(1, Math.min(99, Math.floor(guessCount)))
       : won
         ? 6
         : 6;

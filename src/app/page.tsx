@@ -43,7 +43,7 @@ const homeCards: HomeCard[] = [
     eyebrow: "Words",
     title: "Tertium cipher",
     description:
-      "Daily Wordle-style cipher on a shuffled Darktide word list: same answer for everyone on each calendar day, four to seven letters, six guesses. Streaks stay in this browser as a guest or sync when you sign in.",
+      "Daily Wordle-style cipher on a shuffled Darktide word list: same answer for everyone on each calendar day, four to seven letters, a growing grid after six guesses, or surrender with Heresy (reveal + short lockout). Streaks stay in this browser as a guest or sync when you sign in.",
     cta: "Play cipher",
     icon: IconWordGrid,
   },

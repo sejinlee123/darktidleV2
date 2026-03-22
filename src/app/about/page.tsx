@@ -73,8 +73,11 @@ export default function AboutPage() {
                 <strong className="text-foreground">Tertium cipher</strong>{" "}
                 (Wordle-style) — one puzzle per local calendar day (same answer
                 for everyone on that date), four to seven letters from a
-                shuffled Darktide-themed list, six guesses, standard
-                green/amber/grey feedback. Streaks live in your browser as a
+                shuffled Darktide-themed list; the grid grows past six wrong
+                guesses, or you can use Heresy to reveal the answer (loss +
+                brief device lockout). Repeated letters in the answer and in
+                guesses are allowed. Standard green/amber/grey feedback.
+                Streaks live in your browser as a
                 guest and sync to your account when signed in.
               </li>
               <li>

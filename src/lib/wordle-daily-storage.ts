@@ -8,6 +8,7 @@ import {
 } from "@/lib/wordle-daily";
 
 const STORAGE_KEY = "darktidle.wordle.daily.v1";
+const HERESY_LOCK_KEY = "darktidle.wordle.heresyLock.v1";
 
 export type WordlePersistRow = { guess: string; tiles: WordleTile[] };
 
@@ -16,10 +17,41 @@ export type WordleDailyPersisted = {
   dateKey: string;
   rows: WordlePersistRow[];
   status: "playing" | "won" | "lost";
+  /** Set when the player used the Heresy surrender (UI copy only). */
+  lossKind?: "heresy";
   lastWinDate: string | null;
   currentStreak: number;
   maxStreak: number;
 };
+
+export type WordleHeresyLock = { dateKey: string; until: number };
+
+export function readHeresyLock(): WordleHeresyLock | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(HERESY_LOCK_KEY);
+    if (!raw) return null;
+    const j = JSON.parse(raw) as Partial<WordleHeresyLock>;
+    if (typeof j.dateKey !== "string" || typeof j.until !== "number")
+      return null;
+    return { dateKey: j.dateKey, until: j.until };
+  } catch {
+    return null;
+  }
+}
+
+export function writeHeresyLock(dateKey: string, durationMs: number): void {
+  if (typeof window === "undefined") return;
+  try {
+    const payload: WordleHeresyLock = {
+      dateKey,
+      until: Date.now() + durationMs,
+    };
+    localStorage.setItem(HERESY_LOCK_KEY, JSON.stringify(payload));
+  } catch {
+    /* quota */
+  }
+}
 
 function defaultPersist(dateKey: string): WordleDailyPersisted {
   return {
@@ -52,6 +84,7 @@ export function readWordleDaily(dateKey: string): WordleDailyPersisted {
         j.status === "won" || j.status === "lost" || j.status === "playing"
           ? j.status
           : "playing",
+      lossKind: j.lossKind === "heresy" ? "heresy" : undefined,
       lastWinDate:
         typeof j.lastWinDate === "string" || j.lastWinDate === null
           ? j.lastWinDate
