@@ -17,11 +17,80 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  lastSeenAt    DateTime?
   sessions      Session[]
   accounts      Account[]
+  heardleBoard   HeardleLeaderboard?
+  wordleStats    WordlePlayerStats?
+  wordleResults  WordleDailyResult[]
+  clipLikes      ClipLike[]
+  clipDislikes   ClipDislike[]
 
   @@unique([email])
   @@map("user")
+}
+
+/// Tertium cipher (Wordle) streaks; dateKey is client local calendar YYYY-MM-DD.
+model WordlePlayerStats {
+  userId        String   @id
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak Int      @default(0)
+  maxStreak     Int      @default(0)
+  lastWinDate   String?
+  updatedAt     DateTime @updatedAt
+
+  @@map("wordle_player_stats")
+}
+
+model WordleDailyResult {
+  id         String   @id @default(cuid())
+  userId     String
+  dateKey    String
+  won        Boolean
+  guessCount Int
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dateKey])
+  @@map("wordle_daily_result")
+}
+
+/// One row per user per voice clip (manifest-relative path).
+model ClipLike {
+  id        String   @id @default(cuid())
+  userId    String
+  clipPath  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clipPath])
+  @@index([clipPath])
+  @@map("clip_like")
+}
+
+model ClipDislike {
+  id        String   @id @default(cuid())
+  userId    String
+  clipPath  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clipPath])
+  @@index([clipPath])
+  @@map("clip_dislike")
+}
+
+/// Per-user Heardle win streaks for leaderboard (bestStreak capped at 999 in app logic).
+model HeardleLeaderboard {
+  userId        String   @id
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak Int      @default(0)
+  bestStreak    Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  /// Speeds up leaderboard sort + “how many beat my bestStreak?” count.
+  @@index([bestStreak(sort: Desc), updatedAt(sort: Asc)])
+  @@map("heardle_leaderboard")
 }
 
 model Session {

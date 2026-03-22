@@ -4,11 +4,10 @@ import type { ComponentType } from "react";
 import {
   IconAudioLines,
   IconRadio,
-  IconShield,
-  IconTrophy,
   IconWordGrid,
 } from "@/components/mission-icons";
 
+import { HomeStatsFooter } from "@/components/home/HomeStatsFooter";
 import { buttonVariants } from "@/components/ui/button-variants";
 import {
   Card,
@@ -17,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getHomeStats } from "@/lib/home-stats";
 import { cn } from "@/lib/utils";
 
 type HomeCard = {
@@ -34,17 +34,17 @@ const homeCards: HomeCard[] = [
     eyebrow: "Audio",
     title: "Vox Heardle",
     description:
-      "Listen to a voice line from the hive and guess which personality is speaking—you get seven tries before the vox-link cuts out.",
+      "Hear a Darktide voice line and guess the personality (Zealot, Veteran, Psyker, Ogryn…). Seven wrong guesses and the vox cuts out. Win streaks sync to your account when you sign in, or stay in this browser as a guest.",
     cta: "Play Vox Heardle",
     icon: IconRadio,
   },
   {
     href: "/wordle",
     eyebrow: "Words",
-    title: "Lexicon grid",
+    title: "Tertium cipher",
     description:
-      "Guess the daily five-letter word in six tries—same rules you know, no vox required.",
-    cta: "Play Wordle",
+      "Daily Wordle-style cipher on a shuffled Darktide word list: same answer for everyone on each calendar day, four to seven letters, six guesses. Streaks stay in this browser as a guest or sync when you sign in.",
+    cta: "Play cipher",
     icon: IconWordGrid,
   },
   {
@@ -52,21 +52,29 @@ const homeCards: HomeCard[] = [
     eyebrow: "Archive",
     title: "Vox archive",
     description:
-      "Browse every quote we’ve logged: search by text or personality and replay clips on demand.",
+      "Search and filter the full clip list by line text, ability, class, and gender; play or download MP3s; like lines or mark them heresy (saved when you are logged in).",
     cta: "Open archive",
     icon: IconAudioLines,
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const { activeAgents, bestStreak, streakLoggedIn } = await getHomeStats();
+
   return (
     <div className="flex flex-col items-center justify-center space-y-10 py-10">
       <div className="space-y-4 text-center">
         <h1 className="text-6xl font-black tracking-tighter text-primary drop-shadow-[0_0_18px_oklch(0.78_0.19_145_/_0.35)]">
           Darktidle
         </h1>
-        <p className="text-sm uppercase tracking-widest text-muted-foreground">
-          Vox-link identification training // Tertium hive
+        <p className="mx-auto max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground">
+          Fan-made Warhammer 40,000: Darktide hub: voice guessing, a themed word
+          game, and a searchable archive—plus a leaderboard for signed-in
+          Heardle streaks.
+        </p>
+        <p className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground/90">
+          Non-commercial fan project // Not affiliated with Fatshark or Games
+          Workshop
         </p>
       </div>
 
@@ -128,16 +136,11 @@ export default function Home() {
         )}
       </div>
 
-      <div className="flex w-full max-w-2xl flex-wrap justify-center gap-8 border-t border-border pt-8">
-        <div className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
-          <IconShield className="size-4 shrink-0 text-primary/80" />
-          <span>Active agents: 21</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
-          <IconTrophy className="size-4 shrink-0 text-primary/80" />
-          <span>Best streak: 5 days</span>
-        </div>
-      </div>
+      <HomeStatsFooter
+        activeAgents={activeAgents}
+        serverBestStreak={bestStreak}
+        streakLoggedIn={streakLoggedIn}
+      />
     </div>
   );
 }

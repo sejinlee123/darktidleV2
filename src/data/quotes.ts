@@ -3,9 +3,15 @@ import voiceManifest from "./voice-manifest.json";
 
 export interface Quote {
   id: number | string;
+  /** Manifest-relative path, e.g. Arbites/Grenade/....mp3 — stable id for likes */
+  clipPath: string;
   /** Public URL path (leading slash), e.g. /Darktide_Voices/Veteran/... */
   audio: string;
   text: string;
+  /** Path segment after class folder (e.g. Grenade) — “ability name” in archive search */
+  category: string;
+  /** Archetype key from files (e.g. Scum) — “class” in archive search alongside display name */
+  folderKey: string;
   correct: {
     class: string;
     personality: string;
@@ -26,6 +32,7 @@ type ArchetypeConfig = {
 };
 
 type VoiceConfigFile = {
+  _readme?: string;
   version: number;
   assetBase: string;
   placeholderText: string;
@@ -65,11 +72,14 @@ export const allQuotes: Quote[] = manifest.entries.flatMap((entry) => {
   if (!v) return [];
   const q: Quote = {
     id: `${entry.folder}-${entry.category}-${v.personality}-${entry.gender}-${entry.clipIndex}`,
+    clipPath: entry.path,
     audio: audioUrl(entry.path),
     text:
       typeof entry.text === "string" && entry.text.trim() !== ""
         ? entry.text.trim()
         : placeholder,
+    category: entry.category,
+    folderKey: entry.folder,
     correct: {
       class: archetype.displayClass,
       personality: v.personality,
@@ -79,12 +89,31 @@ export const allQuotes: Quote[] = manifest.entries.flatMap((entry) => {
   return [q];
 });
 
-export const personalities: Personality[] = [
-  ...Object.entries(config.archetypes).flatMap(([, arch]) =>
-    Object.values(arch.variants).map((v) => ({
-      value: v.personality,
-      label: v.label,
-    })),
-  ),
-  { value: "Heavy", label: "Ogryn: Heavy" },
-];
+/** Distinct clip categories (ability names) for the library filter dropdown. */
+export const abilityNameOptions: string[] = Array.from(
+  new Set(allQuotes.map((q) => q.category)),
+).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+
+export const personalities: Personality[] = Object.entries(
+  config.archetypes,
+).flatMap(([, arch]) =>
+  Object.values(arch.variants).map((v) => ({
+    value: v.personality,
+    label: v.label,
+  })),
+);
+
+/** Archetype folder keys + display names for library class filter (matches `Quote.folderKey`). */
+export type ArchetypeClassOption = {
+  folderKey: string;
+  label: string;
+};
+
+export const archetypeClassOptions: ArchetypeClassOption[] = Object.entries(
+  config.archetypes,
+)
+  .map(([folderKey, arch]) => ({
+    folderKey,
+    label: arch.displayClass,
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));

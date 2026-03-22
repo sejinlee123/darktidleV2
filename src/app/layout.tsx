@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 
+import { DarkModeInit } from "@/components/DarkModeInit";
+import { PresenceHeartbeat } from "@/components/PresenceHeartbeat";
 import { SiteHeader } from "@/components/SiteHeader";
 
 import "./globals.css";
@@ -23,6 +24,11 @@ export const metadata: Metadata = {
     template: "%s · Darktidle",
   },
   description: "A Heardle-style daily music game with accounts and leaderboards.",
+  icons: {
+    icon: [{ url: "/darktide_icon-Dl9amRH0.svg", type: "image/svg+xml" }],
+    apple: "/darktide_icon-Dl9amRH0.svg",
+    shortcut: "/darktide_icon-Dl9amRH0.svg",
+  },
 };
 
 export default function RootLayout({
@@ -37,11 +43,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans">
-        <Script
-          id="dark-mode-init"
-          strategy="beforeInteractive"
-        >{`try{var m=window.matchMedia("(prefers-color-scheme: dark)");function s(){document.documentElement.classList.toggle("dark",m.matches);}s();m.addEventListener("change",s);}catch(e){}`}</Script>
+        <DarkModeInit />
         <SiteHeader />
+        <PresenceHeartbeat />
         <main className="flex-1 w-full">{children}</main>
         <Analytics />
       </body>

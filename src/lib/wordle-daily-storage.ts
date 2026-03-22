@@ -1,0 +1,125 @@
+import type { WordleTile } from "@/lib/wordle-score";
+
+import {
+  addCalendarDaysToKey,
+  formatLocalDateKey,
+  nextStreakOnWin,
+  normalizeWordleStreak,
+} from "@/lib/wordle-daily";
+
+const STORAGE_KEY = "darktidle.wordle.daily.v1";
+
+export type WordlePersistRow = { guess: string; tiles: WordleTile[] };
+
+export type WordleDailyPersisted = {
+  v: 1;
+  dateKey: string;
+  rows: WordlePersistRow[];
+  status: "playing" | "won" | "lost";
+  lastWinDate: string | null;
+  currentStreak: number;
+  maxStreak: number;
+};
+
+function defaultPersist(dateKey: string): WordleDailyPersisted {
+  return {
+    v: 1,
+    dateKey,
+    rows: [],
+    status: "playing",
+    lastWinDate: null,
+    currentStreak: 0,
+    maxStreak: 0,
+  };
+}
+
+export function readWordleDaily(dateKey: string): WordleDailyPersisted {
+  if (typeof window === "undefined") {
+    return defaultPersist(dateKey);
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultPersist(dateKey);
+    const j = JSON.parse(raw) as Partial<WordleDailyPersisted>;
+    if (j.v !== 1 || typeof j.dateKey !== "string") {
+      return defaultPersist(dateKey);
+    }
+    const base: WordleDailyPersisted = {
+      v: 1,
+      dateKey: j.dateKey,
+      rows: Array.isArray(j.rows) ? j.rows : [],
+      status:
+        j.status === "won" || j.status === "lost" || j.status === "playing"
+          ? j.status
+          : "playing",
+      lastWinDate:
+        typeof j.lastWinDate === "string" || j.lastWinDate === null
+          ? j.lastWinDate
+          : null,
+      currentStreak:
+        typeof j.currentStreak === "number" ? Math.max(0, j.currentStreak) : 0,
+      maxStreak:
+        typeof j.maxStreak === "number" ? Math.max(0, j.maxStreak) : 0,
+    };
+    if (base.dateKey !== dateKey) {
+      const normalized = normalizeWordleStreak(
+        base.lastWinDate,
+        base.currentStreak,
+        dateKey,
+      );
+      return {
+        ...defaultPersist(dateKey),
+        lastWinDate: base.lastWinDate,
+        currentStreak: normalized,
+        maxStreak: base.maxStreak,
+      };
+    }
+    return {
+      ...base,
+      currentStreak: normalizeWordleStreak(
+        base.lastWinDate,
+        base.currentStreak,
+        dateKey,
+      ),
+    };
+  } catch {
+    return defaultPersist(dateKey);
+  }
+}
+
+export function writeWordleDaily(next: WordleDailyPersisted): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function applyWinToPersist(
+  prev: WordleDailyPersisted,
+  dateKey: string,
+): WordleDailyPersisted {
+  const nextStreak = nextStreakOnWin(
+    prev.lastWinDate,
+    prev.currentStreak,
+    dateKey,
+  );
+  const maxStreak = Math.max(prev.maxStreak, nextStreak);
+  return {
+    ...prev,
+    dateKey,
+    lastWinDate: dateKey,
+    currentStreak: nextStreak,
+    maxStreak,
+  };
+}
+
+export function applyLossToPersist(prev: WordleDailyPersisted): WordleDailyPersisted {
+  return {
+    ...prev,
+    currentStreak: 0,
+  };
+}
+
+export { formatLocalDateKey, addCalendarDaysToKey };

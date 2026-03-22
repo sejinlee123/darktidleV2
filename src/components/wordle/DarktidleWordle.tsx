@@ -1,0 +1,571 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { dailyRoundForDateKey, formatLocalDateKey } from "@/lib/wordle-daily";
+import {
+  applyLossToPersist,
+  applyWinToPersist,
+  readWordleDaily,
+  writeWordleDaily,
+} from "@/lib/wordle-daily-storage";
+import { authClient } from "@/lib/auth-client";
+import { type WordleTile, scoreWordleGuess } from "@/lib/wordle-score";
+import { cn } from "@/lib/utils";
+
+const MAX_GUESSES = 6;
+
+const KEYBOARD_ROWS = [
+  ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+  ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+  ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACK"],
+] as const;
+
+const TILE_RANK: Record<WordleTile, number> = {
+  absent: 0,
+  present: 1,
+  correct: 2,
+};
+
+function mergeKeyHints(
+  prev: Record<string, WordleTile>,
+  guess: string,
+  tiles: WordleTile[],
+): Record<string, WordleTile> {
+  const next = { ...prev };
+  for (let i = 0; i < guess.length; i++) {
+    const ch = guess[i]!.toUpperCase();
+    if (ch < "A" || ch > "Z") continue;
+    const t = tiles[i]!;
+    const old = next[ch];
+    if (old == null || TILE_RANK[t] > TILE_RANK[old]) next[ch] = t;
+  }
+  return next;
+}
+
+function keyHintsFromRows(rows: { guess: string; tiles: WordleTile[] }[]) {
+  let hints: Record<string, WordleTile> = {};
+  for (const r of rows) {
+    hints = mergeKeyHints(hints, r.guess, r.tiles);
+  }
+  return hints;
+}
+
+function tileClasses(state: WordleTile | "empty" | "typing", revealed: boolean) {
+  if (state === "empty" || state === "typing") {
+    return cn(
+      "border-2 border-primary/30 bg-card/80 text-foreground shadow-inner",
+      state === "typing" && "border-primary/60 ring-1 ring-primary/25",
+    );
+  }
+  if (!revealed) {
+    return "border-2 border-primary/35 bg-primary/10 text-primary";
+  }
+  switch (state) {
+    case "correct":
+      return "border-2 border-green-600 bg-green-600 text-white shadow-[0_0_12px_rgba(22,163,74,0.35)]";
+    case "present":
+      return "border-2 border-amber-500 bg-amber-500 text-zinc-950 shadow-[0_0_10px_rgba(245,158,11,0.3)]";
+    case "absent":
+      return "border-2 border-zinc-950 bg-black text-zinc-500";
+    default:
+      return "";
+  }
+}
+
+function keyCapClasses(hint: WordleTile | undefined) {
+  const base =
+    "min-h-10 min-w-[2rem] rounded-md px-1 text-xs font-black uppercase tracking-wide sm:min-w-[2.25rem] sm:text-sm";
+  if (!hint) return cn(base, "bg-muted text-foreground hover:bg-muted/80");
+  switch (hint) {
+    case "correct":
+      return cn(base, "bg-green-600 text-white hover:bg-green-500");
+    case "present":
+      return cn(base, "bg-amber-500 text-zinc-950 hover:bg-amber-400");
+    case "absent":
+      return cn(
+        base,
+        "cursor-not-allowed border border-zinc-950 bg-black text-zinc-600 opacity-80 shadow-inner",
+      );
+    default:
+      return base;
+  }
+}
+
+type RowState = { guess: string; tiles: WordleTile[] };
+
+type ServerStats = {
+  currentStreak: number;
+  maxStreak: number;
+  today: { won: boolean; guessCount: number } | null;
+};
+
+export function DarktidleWordle() {
+  const { data: session } = authClient.useSession();
+  const [todayKey, setTodayKey] = useState(() => formatLocalDateKey());
+
+  const round = useMemo(() => dailyRoundForDateKey(todayKey), [todayKey]);
+  const wordLength = round.length;
+  const solution = round.solution;
+
+  const [rows, setRows] = useState<RowState[]>([]);
+  const [draft, setDraft] = useState("");
+  const [status, setStatus] = useState<"playing" | "won" | "lost">("playing");
+  const [message, setMessage] = useState<string | null>(null);
+  const [shakeRow, setShakeRow] = useState(false);
+  const [keyHints, setKeyHints] = useState<Record<string, WordleTile>>({});
+  const [serverLocked, setServerLocked] = useState(false);
+  const [serverStats, setServerStats] = useState<ServerStats | null>(null);
+  const [localStreak, setLocalStreak] = useState({ current: 0, max: 0 });
+  const completeSyncedRef = useRef(false);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const next = formatLocalDateKey();
+      setTodayKey((prev) => (prev === next ? prev : next));
+    }, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    completeSyncedRef.current = false;
+    const persist = readWordleDaily(todayKey);
+    const validRows = persist.rows.filter((r) => r.guess.length === wordLength);
+    setRows(validRows);
+    setDraft("");
+    setMessage(null);
+    setKeyHints(keyHintsFromRows(validRows));
+    if (validRows.length !== persist.rows.length && persist.rows.length > 0) {
+      setStatus("playing");
+    } else {
+      setStatus(persist.status);
+    }
+    setLocalStreak({
+      current: persist.currentStreak,
+      max: persist.maxStreak,
+    });
+  }, [todayKey, wordLength]);
+
+  const refreshServerStats = useCallback(async () => {
+    const res = await fetch(
+      `/api/wordle/stats?dateKey=${encodeURIComponent(todayKey)}`,
+      { credentials: "include" },
+    );
+    if (!res.ok) return;
+    const data = (await res.json()) as {
+      loggedIn: boolean;
+      currentStreak: number;
+      maxStreak: number;
+      today: { won: boolean; guessCount: number } | null;
+    };
+    if (!data.loggedIn) {
+      setServerStats(null);
+      setServerLocked(false);
+      return;
+    }
+    setServerStats({
+      currentStreak: data.currentStreak,
+      maxStreak: data.maxStreak,
+      today: data.today,
+    });
+    if (data.today) {
+      const persist = readWordleDaily(todayKey);
+      const localFinished =
+        persist.status === "won" || persist.status === "lost";
+      if (persist.rows.length > 0 && localFinished) {
+        setServerLocked(false);
+      } else {
+        setServerLocked(true);
+        setStatus(data.today.won ? "won" : "lost");
+        setRows([]);
+        setDraft("");
+        setKeyHints({});
+      }
+    } else {
+      setServerLocked(false);
+    }
+  }, [todayKey]);
+
+  useEffect(() => {
+    void refreshServerStats();
+  }, [refreshServerStats, session?.user?.id]);
+
+  const displayStreak =
+    session?.user && serverStats !== null
+      ? Math.max(serverStats.currentStreak, localStreak.current)
+      : localStreak.current;
+  const displayBest =
+    session?.user && serverStats !== null
+      ? Math.max(serverStats.maxStreak, localStreak.max)
+      : localStreak.max;
+
+  const postComplete = useCallback(
+    async (won: boolean, guessCount: number) => {
+      if (!session?.user?.id) return;
+      try {
+        const res = await fetch("/api/wordle/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ dateKey: todayKey, won, guessCount }),
+        });
+        if (res.ok) {
+          const j = (await res.json()) as {
+            currentStreak: number;
+            maxStreak: number;
+          };
+          setServerStats((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  currentStreak: j.currentStreak,
+                  maxStreak: j.maxStreak,
+                  today: { won, guessCount },
+                }
+              : {
+                  currentStreak: j.currentStreak,
+                  maxStreak: j.maxStreak,
+                  today: { won, guessCount },
+                },
+          );
+        }
+      } catch {
+        /* offline */
+      }
+    },
+    [session?.user?.id, todayKey],
+  );
+
+  const commitGuess = useCallback(() => {
+    if (status !== "playing" || serverLocked) return;
+    const g = draft.toUpperCase();
+    if (g.length !== wordLength) {
+      setMessage(`Enter ${wordLength} letters`);
+      setShakeRow(true);
+      window.setTimeout(() => setShakeRow(false), 450);
+      return;
+    }
+    if (!/^[A-Z]+$/.test(g)) {
+      setMessage("Letters A–Z only");
+      setShakeRow(true);
+      window.setTimeout(() => setShakeRow(false), 450);
+      return;
+    }
+
+    const tiles = scoreWordleGuess(g, solution);
+    setKeyHints((prev) => mergeKeyHints(prev, g, tiles));
+    const nextRows = [...rows, { guess: g, tiles }];
+    setRows(nextRows);
+    setDraft("");
+    setMessage(null);
+
+    const guessCount = nextRows.length;
+
+    if (g === solution) {
+      setStatus("won");
+      const prev = readWordleDaily(todayKey);
+      const afterWin = applyWinToPersist(
+        { ...prev, dateKey: todayKey, rows: nextRows, status: "won" },
+        todayKey,
+      );
+      writeWordleDaily(afterWin);
+      setLocalStreak({
+        current: afterWin.currentStreak,
+        max: afterWin.maxStreak,
+      });
+      if (session?.user?.id && !completeSyncedRef.current) {
+        completeSyncedRef.current = true;
+        void postComplete(true, guessCount);
+      }
+      return;
+    }
+    if (nextRows.length >= MAX_GUESSES) {
+      setStatus("lost");
+      const prev = readWordleDaily(todayKey);
+      const afterLoss = applyLossToPersist({
+        ...prev,
+        dateKey: todayKey,
+        rows: nextRows,
+        status: "lost",
+      });
+      writeWordleDaily(afterLoss);
+      setLocalStreak({
+        current: afterLoss.currentStreak,
+        max: afterLoss.maxStreak,
+      });
+      if (session?.user?.id && !completeSyncedRef.current) {
+        completeSyncedRef.current = true;
+        void postComplete(false, guessCount);
+      }
+      return;
+    }
+
+    const prev = readWordleDaily(todayKey);
+    writeWordleDaily({
+      ...prev,
+      dateKey: todayKey,
+      rows: nextRows,
+      status: "playing",
+    });
+  }, [
+    draft,
+    solution,
+    status,
+    wordLength,
+    rows,
+    todayKey,
+    serverLocked,
+    session?.user?.id,
+    postComplete,
+  ]);
+
+  const onKey = useCallback(
+    (key: string) => {
+      if (status !== "playing" || serverLocked) return;
+      setMessage(null);
+      const k = key.toUpperCase();
+      if (k === "BACK" || k === "BACKSPACE") {
+        setDraft((d) => d.slice(0, -1));
+        return;
+      }
+      if (k === "ENTER") {
+        commitGuess();
+        return;
+      }
+      if (
+        k.length === 1 &&
+        k >= "A" &&
+        k <= "Z" &&
+        draft.length < wordLength &&
+        keyHints[k] !== "absent"
+      ) {
+        setDraft((d) => d + k);
+      }
+    },
+    [commitGuess, draft.length, keyHints, status, wordLength, serverLocked],
+  );
+
+  useEffect(() => {
+    const onDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (status !== "playing" || serverLocked) return;
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitGuess();
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        setDraft((d) => d.slice(0, -1));
+        return;
+      }
+      if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+        e.preventDefault();
+        const ch = e.key.toUpperCase();
+        if (keyHints[ch] === "absent") return;
+        setDraft((d) => (d.length < wordLength ? d + ch : d));
+      }
+    };
+    window.addEventListener("keydown", onDown);
+    return () => window.removeEventListener("keydown", onDown);
+  }, [commitGuess, keyHints, status, wordLength, serverLocked]);
+
+  const grid = useMemo(() => {
+    const cells: {
+      letter: string;
+      tile: WordleTile | "empty" | "typing";
+      revealed: boolean;
+    }[][] = [];
+    for (let r = 0; r < MAX_GUESSES; r++) {
+      const row: (typeof cells)[number] = [];
+      const committed = rows[r];
+      for (let c = 0; c < wordLength; c++) {
+        if (committed) {
+          row.push({
+            letter: committed.guess[c] ?? "",
+            tile: committed.tiles[c] ?? "absent",
+            revealed: true,
+          });
+        } else if (r === rows.length) {
+          const ch = draft[c] ?? "";
+          row.push({
+            letter: ch,
+            tile: ch ? "typing" : "empty",
+            revealed: false,
+          });
+        } else {
+          row.push({ letter: "", tile: "empty", revealed: false });
+        }
+      }
+      cells.push(row);
+    }
+    return cells;
+  }, [draft, rows, wordLength]);
+
+  const playing = status === "playing" && !serverLocked;
+
+  return (
+    <div className="mx-auto max-w-lg space-y-6 px-4 py-8">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-black tracking-tighter text-primary drop-shadow-[0_0_14px_oklch(0.78_0.19_145_/_0.2)]">
+          Tertium cipher
+        </h1>
+        <p className="text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
+          Daily puzzle · {wordLength} glyphs · {todayKey}
+        </p>
+        <p className="text-xs font-semibold text-muted-foreground">
+          Streak{" "}
+          <span className="font-mono text-foreground">{displayStreak}</span>
+          {" · "}
+          Best{" "}
+          <span className="font-mono text-foreground">{displayBest}</span>
+          {session?.user ? (
+            <span className="block text-[10px] font-normal uppercase tracking-widest text-primary/70">
+              Synced when signed in
+            </span>
+          ) : (
+            <span className="block text-[10px] font-normal uppercase tracking-widest text-muted-foreground">
+              Saved on this device
+            </span>
+          )}
+        </p>
+      </div>
+
+      <Card className="border-2 border-primary/20 bg-card/85 shadow-xl ring-1 ring-primary/10 backdrop-blur-sm">
+        <CardHeader className="space-y-3 border-b border-border pb-4">
+          <CardTitle className="text-base font-black tracking-widest text-primary">
+            Briefing
+          </CardTitle>
+          <p className="text-[10px] leading-relaxed text-muted-foreground">
+            One cipher per local calendar day; everyone gets the same answer for
+            that date (length is four to seven glyphs from the shuffled Darktide
+            word list). Six guesses; any word of the right length (A–Z) is
+            accepted. Green = correct place, amber = wrong place. Streaks break
+            if you skip a day or fail — sign in to sync streaks across devices.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-6">
+          {serverLocked && rows.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              You already finished today&apos;s cipher on this account. The
+              guess grid is only stored on the device where you played; streak
+              counts are synced when you&apos;re signed in.
+            </p>
+          ) : null}
+
+          <div
+            className={cn(
+              "mx-auto flex w-full max-w-[min(100%,22rem)] flex-col gap-1.5 sm:max-w-[26rem]",
+              shakeRow && "animate-wordle-shake",
+            )}
+          >
+            {grid.map((row, ri) => (
+              <div
+                key={ri}
+                className="grid gap-1.5"
+                style={{
+                  gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))`,
+                }}
+              >
+                {row.map((cell, ci) => (
+                  <div
+                    key={ci}
+                    className={cn(
+                      "flex aspect-square max-h-14 items-center justify-center rounded-md text-lg font-black uppercase tracking-widest sm:max-h-16 sm:text-xl",
+                      tileClasses(cell.tile, cell.revealed),
+                    )}
+                  >
+                    {cell.letter}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+
+          {message ? (
+            <p className="text-center text-sm font-semibold text-amber-500">
+              {message}
+            </p>
+          ) : null}
+
+          {status === "won" ? (
+            <p className="text-center text-sm font-bold text-green-500">
+              Cipher broken — the Emperor&apos;s lexicon holds.
+            </p>
+          ) : null}
+          {status === "lost" ? (
+            <p className="text-center text-sm font-bold text-red-400">
+              Signal lost. The word was{" "}
+              <span className="font-mono text-primary">{solution}</span>.
+            </p>
+          ) : null}
+
+          <div className="space-y-2">
+            {KEYBOARD_ROWS.map((row, i) => (
+              <div
+                key={i}
+                className="flex flex-wrap justify-center gap-1 sm:gap-1.5"
+              >
+                {row.map((k) => {
+                  if (k === "ENTER") {
+                    return (
+                      <Button
+                        key={k}
+                        type="button"
+                        variant="default"
+                        size="sm"
+                        disabled={!playing}
+                        className={cn(
+                          "min-h-10 flex-1 px-2 text-[10px] font-black uppercase sm:max-w-[4.5rem] sm:flex-none sm:text-xs",
+                          "shadow-[0_0_16px_oklch(0.62_0.2_145_/_0.45)] ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
+                          "hover:ring-primary/80",
+                        )}
+                        onClick={() => onKey("ENTER")}
+                      >
+                        Enter
+                      </Button>
+                    );
+                  }
+                  if (k === "BACK") {
+                    return (
+                      <Button
+                        key={k}
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        disabled={!playing}
+                        className="min-h-10 flex-1 px-2 text-[10px] font-black uppercase sm:max-w-[4.5rem] sm:flex-none sm:text-xs"
+                        onClick={() => onKey("BACK")}
+                      >
+                        ⌫
+                      </Button>
+                    );
+                  }
+                  const absent = keyHints[k] === "absent";
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      disabled={!playing || absent}
+                      className={keyCapClasses(keyHints[k])}
+                      onClick={() => onKey(k)}
+                    >
+                      {k}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

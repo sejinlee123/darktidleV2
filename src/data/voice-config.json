@@ -5,11 +5,11 @@
   "placeholderText": "Placeholder",
   "archetypes": {
     "Arbites": {
-      "displayClass": "Arbitrator",
+      "displayClass": "Arbites",
       "variants": {
-        "A": { "personality": "Authoritarian", "label": "Arbitrator: Authoritarian" },
-        "B": { "personality": "Maul", "label": "Arbitrator: Maul" },
-        "C": { "personality": "Fatalist", "label": "Arbitrator: Fatalist" }
+        "A": { "personality": "Authoritarian", "label": "Arbites: Authoritarian" },
+        "B": { "personality": "Fatalist", "label": "Arbites: Fatalist" },
+        "C": { "personality": "Maul", "label": "Arbites: Maul" }
       }
     },
     "Veteran": {
@@ -23,33 +23,33 @@
     "Zealot": {
       "displayClass": "Zealot",
       "variants": {
-        "A": { "personality": "Judge", "label": "Zealot: Judge" },
-        "B": { "personality": "Agitator", "label": "Zealot: Agitator" },
-        "C": { "personality": "Fanatic", "label": "Zealot: Fanatic" }
+        "A": { "personality": "Agitator", "label": "Zealot: Agitator" },
+        "B": { "personality": "Fanatic", "label": "Zealot: Fanatic" },
+        "C": { "personality": "Judge", "label": "Zealot: Judge" }
       }
     },
     "Psyker": {
       "displayClass": "Psyker",
       "variants": {
-        "A": { "personality": "Savant", "label": "Psyker: Savant" },
-        "B": { "personality": "Loner", "label": "Psyker: Loner" },
-        "C": { "personality": "Seer", "label": "Psyker: Seer" }
+        "A": { "personality": "Loner", "label": "Psyker: Loner" },
+        "B": { "personality": "Seer", "label": "Psyker: Seer" },
+        "C": { "personality": "Savant", "label": "Psyker: Savant" }
       }
     },
     "Ogryn": {
       "displayClass": "Ogryn",
       "variants": {
         "A": { "personality": "Bodyguard", "label": "Ogryn: Bodyguard" },
-        "B": { "personality": "Brawler", "label": "Ogryn: Brawler" },
-        "C": { "personality": "Bully", "label": "Ogryn: Bully" }
+        "B": { "personality": "Bully", "label": "Ogryn: Bully" },
+        "C": { "personality": "Brawler", "label": "Ogryn: Brawler" }
       }
     },
     "Scum": {
       "displayClass": "Hive Scum",
       "variants": {
-        "A": { "personality": "Anarchist", "label": "Hive Scum: Anarchist" },
-        "B": { "personality": "Scrapper", "label": "Hive Scum: Scrapper" },
-        "C": { "personality": "Ganger", "label": "Hive Scum: Ganger" }
+        "A": { "personality": "Outlaw", "label": "Hive Scum: Outlaw" },
+        "B": { "personality": "Bounty Hunter", "label": "Hive Scum: Bounty Hunter" },
+        "C": { "personality": "Anarchist", "label": "Hive Scum: Anarchist" }
       }
     }
   }

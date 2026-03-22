@@ -11,6 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
+import { ProfileNameForm } from "@/components/profile/ProfileNameForm";
 import { SignOutButton } from "@/components/SignOutButton";
 import { cn } from "@/lib/utils";
 
@@ -35,17 +37,8 @@ export default async function ProfilePage() {
             <span className="font-medium text-foreground">{user.email}</span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {user.name ? (
-            <p className="text-sm text-muted-foreground">
-              Display name:{" "}
-              <span className="font-medium text-foreground">{user.name}</span>
-            </p>
-          ) : null}
-          <p className="text-sm text-muted-foreground">
-            User id:{" "}
-            <span className="font-mono text-xs text-foreground">{user.id}</span>
-          </p>
+        <CardContent className="flex flex-col gap-4">
+          <ProfileNameForm initialName={user.name ?? ""} />
           <div className="flex flex-wrap gap-2 pt-2">
             <Link
               href="/"
@@ -54,6 +47,12 @@ export default async function ProfilePage() {
               Home
             </Link>
             <SignOutButton />
+          </div>
+          <div className="border-t border-border pt-4">
+            <p className="mb-2 text-xs text-muted-foreground">
+              Remove your account and all associated data from this site.
+            </p>
+            <DeleteAccountButton />
           </div>
         </CardContent>
       </Card>

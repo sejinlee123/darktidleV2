@@ -173,4 +173,27 @@
   a:focus-visible {
     @apply rounded-md outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
+
+  @keyframes wordle-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-6px);
+    }
+    40% {
+      transform: translateX(6px);
+    }
+    60% {
+      transform: translateX(-4px);
+    }
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  .animate-wordle-shake {
+    animation: wordle-shake 0.4s ease-in-out;
+  }
 }
