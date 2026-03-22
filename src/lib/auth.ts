@@ -3,13 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 
 import { prisma } from "@/lib/prisma";
-
-/** Strip trailing slashes so origins match browser `Origin` headers. */
-function normalizeOrigin(url: string | undefined | null): string | null {
-  if (!url) return null;
-  const t = url.trim().replace(/\/+$/, "");
-  return t.length > 0 ? t : null;
-}
+import { getSiteOrigin, normalizeOrigin } from "@/lib/site-origin";
 
 /** Browsers treat `localhost` and `127.0.0.1` as different origins; trust both for local HTTP. */
 function localHostTwin(origin: string): string | null {
@@ -25,17 +19,7 @@ function localHostTwin(origin: string): string | null {
   return null;
 }
 
-const port = process.env.PORT ?? "3000";
-const defaultLocal = `http://localhost:${port}`;
-
-const baseURL =
-  normalizeOrigin(process.env.BETTER_AUTH_URL) ||
-  normalizeOrigin(
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : defaultLocal,
-  ) ||
-  defaultLocal;
+const baseURL = getSiteOrigin();
 
 const trustedOriginsSet = new Set<string>();
 const addTrusted = (url: string | undefined | null) => {
