@@ -93,7 +93,7 @@ function tileClasses(state: WordleTile | "empty" | "typing", revealed: boolean) 
 
 function keyCapClasses(hint: WordleTile | undefined) {
   const base =
-    "min-h-10 min-w-[2rem] rounded-md px-1 text-xs font-black uppercase tracking-wide sm:min-w-[2.25rem] sm:text-sm";
+    "flex h-10 w-full min-w-0 items-center justify-center rounded-md px-0.5 text-[11px] font-black uppercase tracking-wide sm:px-1 sm:text-sm";
   if (!hint) return cn(base, "bg-muted text-foreground hover:bg-muted/80");
   switch (hint) {
     case "correct":
@@ -673,61 +673,80 @@ export function DarktidleWordle() {
               showPenanceOverlay && "pointer-events-none select-none opacity-40",
             )}
           >
-            {KEYBOARD_ROWS.map((row, i) => (
-              <div
-                key={i}
-                className="flex flex-wrap justify-center gap-1 sm:gap-1.5"
+            <div className="grid w-full max-w-full grid-cols-10 gap-0.5 sm:gap-1">
+              {KEYBOARD_ROWS[0].map((k) => {
+                const absent = keyHints[k] === "absent";
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    disabled={!playing || absent}
+                    className={keyCapClasses(keyHints[k])}
+                    onClick={() => onKey(k)}
+                  >
+                    {k}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="grid w-full max-w-full grid-cols-9 gap-0.5 sm:gap-1">
+              {KEYBOARD_ROWS[1].map((k) => {
+                const absent = keyHints[k] === "absent";
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    disabled={!playing || absent}
+                    className={keyCapClasses(keyHints[k])}
+                    onClick={() => onKey(k)}
+                  >
+                    {k}
+                  </button>
+                );
+              })}
+            </div>
+            <div
+              className="grid w-full max-w-full grid-cols-[minmax(2.25rem,3.25rem)_repeat(7,minmax(0,1fr))_minmax(2.25rem,3.25rem)] gap-0.5 sm:gap-1"
+            >
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                disabled={!playing}
+                className={cn(
+                  "h-10 min-h-10 w-full min-w-0 shrink-0 px-0.5 text-[9px] font-black uppercase leading-tight sm:px-2 sm:text-xs",
+                  "shadow-[0_0_16px_oklch(0.62_0.2_145_/_0.45)] ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
+                  "hover:ring-primary/80",
+                )}
+                onClick={() => onKey("ENTER")}
               >
-                {row.map((k) => {
-                  if (k === "ENTER") {
-                    return (
-                      <Button
-                        key={k}
-                        type="button"
-                        variant="default"
-                        size="sm"
-                        disabled={!playing}
-                        className={cn(
-                          "min-h-10 flex-1 px-2 text-[10px] font-black uppercase sm:max-w-[4.5rem] sm:flex-none sm:text-xs",
-                          "shadow-[0_0_16px_oklch(0.62_0.2_145_/_0.45)] ring-2 ring-primary/60 ring-offset-2 ring-offset-background",
-                          "hover:ring-primary/80",
-                        )}
-                        onClick={() => onKey("ENTER")}
-                      >
-                        Enter
-                      </Button>
-                    );
-                  }
-                  if (k === "BACK") {
-                    return (
-                      <Button
-                        key={k}
-                        type="button"
-                        variant="secondary"
-                        size="sm"
-                        disabled={!playing}
-                        className="min-h-10 flex-1 px-2 text-[10px] font-black uppercase sm:max-w-[4.5rem] sm:flex-none sm:text-xs"
-                        onClick={() => onKey("BACK")}
-                      >
-                        ⌫
-                      </Button>
-                    );
-                  }
-                  const absent = keyHints[k] === "absent";
-                  return (
-                    <button
-                      key={k}
-                      type="button"
-                      disabled={!playing || absent}
-                      className={keyCapClasses(keyHints[k])}
-                      onClick={() => onKey(k)}
-                    >
-                      {k}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
+                Enter
+              </Button>
+              {KEYBOARD_ROWS[2].slice(1, -1).map((k) => {
+                const absent = keyHints[k] === "absent";
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    disabled={!playing || absent}
+                    className={keyCapClasses(keyHints[k])}
+                    onClick={() => onKey(k)}
+                  >
+                    {k}
+                  </button>
+                );
+              })}
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={!playing}
+                className="h-10 min-h-10 w-full min-w-0 shrink-0 px-0.5 text-sm font-black sm:px-2"
+                onClick={() => onKey("BACK")}
+              >
+                ⌫
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
