@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { dailyRoundForDateKey, formatLocalDateKey } from "@/lib/wordle-daily";
 import {
-  applyLossToPersist,
   applyWinToPersist,
   readHeresyLock,
   readWordleDaily,
@@ -136,7 +135,7 @@ export function DarktidleWordle() {
   const [serverLocked, setServerLocked] = useState(false);
   const [serverStats, setServerStats] = useState<ServerStats | null>(null);
   const [localStreak, setLocalStreak] = useState({ current: 0, max: 0 });
-  const [lossKind, setLossKind] = useState<"heresy" | null>(null);
+  const [revealedViaHeresy, setRevealedViaHeresy] = useState(false);
   const [lockTick, setLockTick] = useState(0);
   const completeSyncedRef = useRef(false);
 
@@ -161,7 +160,7 @@ export function DarktidleWordle() {
     } else {
       setStatus(persist.status);
     }
-    setLossKind(persist.lossKind === "heresy" ? "heresy" : null);
+    setRevealedViaHeresy(persist.revealedViaHeresy === true);
     setLocalStreak({
       current: persist.currentStreak,
       max: persist.maxStreak,
@@ -185,7 +184,7 @@ export function DarktidleWordle() {
       }
     }, 1000);
     return () => window.clearInterval(id);
-  }, [todayKey, status, lossKind]);
+  }, [todayKey, revealedViaHeresy]);
 
   const penanceRemainingMs = useMemo(() => {
     if (typeof window === "undefined") return 0;
@@ -287,33 +286,31 @@ export function DarktidleWordle() {
   const commitHeresy = useCallback(() => {
     if (status !== "playing" || serverLocked) return;
     if (rows.length < HERESY_OFFER_AFTER) return;
+    if (revealedViaHeresy) return;
 
     writeHeresyLock(todayKey, PENANCE_MS);
     setLockTick((t) => t + 1);
-    setLossKind("heresy");
-    setStatus("lost");
+    setRevealedViaHeresy(true);
 
     const prev = readWordleDaily(todayKey);
-    const afterLoss = applyLossToPersist({
+    writeWordleDaily({
       ...prev,
       dateKey: todayKey,
       rows,
-      status: "lost",
-      lossKind: "heresy",
+      status: "playing",
+      revealedViaHeresy: true,
+      lossKind: undefined,
     });
-    writeWordleDaily(afterLoss);
-    setLocalStreak({
-      current: afterLoss.currentStreak,
-      max: afterLoss.maxStreak,
-    });
-    if (session?.user?.id && !completeSyncedRef.current) {
-      completeSyncedRef.current = true;
-      void postComplete(false, rows.length);
-    }
-  }, [rows, serverLocked, session?.user?.id, status, todayKey, postComplete]);
+  }, [
+    revealedViaHeresy,
+    rows,
+    serverLocked,
+    status,
+    todayKey,
+  ]);
 
   const commitGuess = useCallback(() => {
-    if (status !== "playing" || serverLocked) return;
+    if (status !== "playing" || serverLocked || penanceRemainingMs > 0) return;
     const g = draft.toUpperCase();
     if (g.length !== wordLength) {
       setMessage(`Enter ${wordLength} letters`);
@@ -347,6 +344,7 @@ export function DarktidleWordle() {
           rows: nextRows,
           status: "won",
           lossKind: undefined,
+          revealedViaHeresy: undefined,
         },
         todayKey,
       );
@@ -379,11 +377,13 @@ export function DarktidleWordle() {
     serverLocked,
     session?.user?.id,
     postComplete,
+    penanceRemainingMs,
   ]);
 
   const onKey = useCallback(
     (key: string) => {
-      if (status !== "playing" || serverLocked) return;
+      if (status !== "playing" || serverLocked || penanceRemainingMs > 0)
+        return;
       setMessage(null);
       const k = key.toUpperCase();
       if (k === "BACK" || k === "BACKSPACE") {
@@ -404,13 +404,22 @@ export function DarktidleWordle() {
         setDraft((d) => d + k);
       }
     },
-    [commitGuess, draft.length, keyHints, status, wordLength, serverLocked],
+    [
+      commitGuess,
+      draft.length,
+      keyHints,
+      penanceRemainingMs,
+      status,
+      wordLength,
+      serverLocked,
+    ],
   );
 
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (status !== "playing" || serverLocked) return;
+      if (status !== "playing" || serverLocked || penanceRemainingMs > 0)
+        return;
       if (e.key === "Enter") {
         e.preventDefault();
         commitGuess();
@@ -430,7 +439,14 @@ export function DarktidleWordle() {
     };
     window.addEventListener("keydown", onDown);
     return () => window.removeEventListener("keydown", onDown);
-  }, [commitGuess, keyHints, status, wordLength, serverLocked]);
+  }, [
+    commitGuess,
+    keyHints,
+    penanceRemainingMs,
+    status,
+    wordLength,
+    serverLocked,
+  ]);
 
   /** Tile size + grid width scale with glyph count so 4-letter days feel roomy and 7-letter days still fit. */
   const { gridMaxWidthRem, tileTextClass } = useMemo(() => {
@@ -490,9 +506,15 @@ export function DarktidleWordle() {
     return cells;
   }, [draft, rows, wordLength, status]);
 
-  const playing = status === "playing" && !serverLocked;
+  const playing =
+    status === "playing" &&
+    !serverLocked &&
+    penanceRemainingMs <= 0;
   const showHeresy =
-    playing && rows.length >= HERESY_OFFER_AFTER;
+    status === "playing" &&
+    !serverLocked &&
+    rows.length >= HERESY_OFFER_AFTER &&
+    !revealedViaHeresy;
   const showPenanceOverlay = penanceRemainingMs > 0;
 
   return (
@@ -527,14 +549,17 @@ export function DarktidleWordle() {
           <CardTitle className="text-base font-black tracking-widest text-primary">
             Briefing
           </CardTitle>
-          <p className="text-[10px] leading-relaxed text-muted-foreground">
+          <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm">
             One cipher per local calendar day. Everyone gets the same answer for
-            that date (length is four to seven glyphs). The grid starts at six rows and grows if you need more;
-            any word of the right length (A–Z) is accepted — letters may appear
-            more than once in the answer and in your guesses. After six guesses you
-            may keep trying or use REDACTED. Green = correct place, amber = wrong place. Streaks
-            break if you skip a day or fail — sign in to sync streaks across
-            devices.
+            that date (length is four to seven glyphs). The grid starts at six
+            rows and grows if you need more. Any word of the right length (A–Z)
+            is accepted — letters may appear more than once in the answer and in
+            your guesses. After six guesses you may keep trying or use{" "}
+            <span className="text-destructive">Heresy</span> to see the answer
+            (five-minute input lock). You can still win afterward and keep your
+            streak. Green = correct place, amber = wrong place. Streaks break if
+            you skip a day or fail the puzzle without solving it — sign in to
+            sync streaks across devices.
           </p>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
@@ -563,7 +588,8 @@ export function DarktidleWordle() {
                   <span className="font-mono font-bold text-primary">
                     {solution}
                   </span>
-                  . Reflect until the lock lifts.
+                  . When the lock lifts, you may still enter the winning word —
+                  your streak is not broken by Heresy alone.
                 </p>
               </div>
             ) : null}
@@ -616,17 +642,17 @@ export function DarktidleWordle() {
           ) : null}
           {status === "lost" ? (
             <p className="text-center text-sm font-bold text-red-400">
-              {lossKind === "heresy" ? (
-                <>
-                  Heresy — the Ordos records a broken streak. The word was{" "}
-                  <span className="font-mono text-primary">{solution}</span>.
-                </>
-              ) : (
-                <>
-                  Signal lost. The word was{" "}
-                  <span className="font-mono text-primary">{solution}</span>.
-                </>
-              )}
+              Signal lost. The word was{" "}
+              <span className="font-mono text-primary">{solution}</span>.
+            </p>
+          ) : null}
+
+          {revealedViaHeresy &&
+          status === "playing" &&
+          !showPenanceOverlay ? (
+            <p className="text-center text-sm font-semibold text-amber-600">
+              Heresy revealed the word:{" "}. Now reflect and penance.
+              <span className="font-mono text-primary">{solution}</span>.
             </p>
           ) : null}
 
@@ -641,10 +667,6 @@ export function DarktidleWordle() {
               >
                 Heresy — reveal and penance
               </Button>
-              <p className="max-w-xs text-center text-[10px] text-muted-foreground">
-                Ends today as a loss, shows the answer, and locks play for five
-                minutes on this device.
-              </p>
             </div>
           ) : null}
 

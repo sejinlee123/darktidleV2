@@ -17,8 +17,10 @@ export type WordleDailyPersisted = {
   dateKey: string;
   rows: WordlePersistRow[];
   status: "playing" | "won" | "lost";
-  /** Set when the player used the Heresy surrender (UI copy only). */
+  /** Legacy: Heresy used to end the day as a loss. */
   lossKind?: "heresy";
+  /** True after Wordle Heresy: answer was shown; puzzle stays playable after penance. */
+  revealedViaHeresy?: boolean;
   lastWinDate: string | null;
   currentStreak: number;
   maxStreak: number;
@@ -85,6 +87,7 @@ export function readWordleDaily(dateKey: string): WordleDailyPersisted {
           ? j.status
           : "playing",
       lossKind: j.lossKind === "heresy" ? "heresy" : undefined,
+      revealedViaHeresy: j.revealedViaHeresy === true,
       lastWinDate:
         typeof j.lastWinDate === "string" || j.lastWinDate === null
           ? j.lastWinDate
