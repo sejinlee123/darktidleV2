@@ -1,0 +1,149 @@
+[
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "Professional",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_Professional_male_ability_infiltrate",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"},
+      {"id": "p14", "suffix": "14", "text": "Hold the line!"},
+      {"id": "p15", "suffix": "15", "text": "Cadia stands!"}
+    ]
+  },
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "Professional",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_Professional_male_ability_VoiceOfCommand",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"},
+      {"id": "p14", "suffix": "14", "text": "Hold the line!"}
+    ]
+  },
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "CutThroat",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_CutThroat_male_ability_infiltrate",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"},
+      {"id": "p14", "suffix": "14", "text": "Hold the line!"},
+      {"id": "p15", "suffix": "15", "text": "Cadia stands!"}
+    ]
+  },
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "CutThroat",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_CutThroat_male_ability_VoiceOfCommand",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"}
+    ]
+  },
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "LooseCannon",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_LooseCannon_male_ability_infiltrate",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"},
+      {"id": "p14", "suffix": "14", "text": "Hold the line!"},
+      {"id": "p15", "suffix": "15", "text": "Cadia stands!"}
+    ]
+  },
+  {
+    "meta": {
+      "class": "Veteran",
+      "personality": "LooseCannon",
+      "gender": "Male"
+    },
+    "audioPrefix": "veteran_LooseCannon_male_ability_VoiceOfCommand",
+    "quotes": [
+      {"id": "p1", "suffix": "01", "text": "For the Emperor!"},
+      {"id": "p2", "suffix": "02", "text": "Hammer of the Emperor!"},
+      {"id": "p3", "suffix": "03", "text": "For the Guard!"},
+      {"id": "p4", "suffix": "04", "text": "Duty is its own reward!"},
+      {"id": "p5", "suffix": "05", "text": "First rank, FIRE!"},
+      {"id": "p6", "suffix": "06", "text": "By my command!"},
+      {"id": "p7", "suffix": "07", "text": "Incoming fire, take cover!"},
+      {"id": "p8", "suffix": "08", "text": "Stand fast, soldiers!"},
+      {"id": "p9", "suffix": "09", "text": "Fix bayonets!"},
+      {"id": "p10", "suffix": "10", "text": "Target eliminated."},
+      {"id": "p11", "suffix": "11", "text": "Reloading, cover me!"},
+      {"id": "p12", "suffix": "12", "text": "Frag out!"},
+      {"id": "p13", "suffix": "13", "text": "The Emperor protects!"},
+      {"id": "p14", "suffix": "14", "text": "Hold the line!"},
+      {"id": "p15", "suffix": "15", "text": "Cadia stands!"}
+    ]
+  }
+]
