@@ -79,7 +79,7 @@ export function HeardleGame() {
     pickRandomQuote(),
   );
   const [attempts, setAttempts] = useState<Guess[]>([]);
-  /** Wrong guesses across all rounds since last loss; chips persist until streak breaks. */
+  /** Wrong guesses since last streak loss; kept for guest localStorage sync (not shown as chips). */
   const [streakFailedGuesses, setStreakFailedGuesses] = useState<Guess[]>([]);
   const [gameState, setGameState] = useState<GameStatus>("playing");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -864,9 +864,9 @@ export function HeardleGame() {
               </div>
             ) : null}
             <div className="flex flex-wrap justify-center gap-2">
-              {streakFailedGuesses.map((g, i) => (
+              {attempts.map((g, i) => (
                 <span
-                  key={`streak-fail-${i}`}
+                  key={`round-fail-${i}-${g.personality}`}
                   className="rounded border border-red-500/35 bg-red-500/10 px-2 py-1 text-[10px] text-red-400"
                 >
                   {g.personality} ✕
