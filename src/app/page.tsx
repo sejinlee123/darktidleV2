@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import type { ComponentType } from "react";
 
@@ -18,6 +19,10 @@ import {
 } from "@/components/ui/card";
 import { getHomeStats } from "@/lib/home-stats";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 type HomeCard = {
   href: string;

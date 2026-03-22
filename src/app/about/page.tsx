@@ -9,12 +9,21 @@ import {
   IconWordGrid,
 } from "@/components/mission-icons";
 
+import type { Metadata } from "next";
+
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "What Darktidle is: a non-commercial fan project for Warhammer 40,000: Darktide games and archive — not affiliated with Fatshark or Games Workshop.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { getSiteOrigin } from "@/lib/site-origin";
 
+/** Indexable public routes only (auth/account pages use noindex). */
 const paths = [
   "/",
   "/heardle",
@@ -9,9 +10,6 @@ const paths = [
   "/library",
   "/leaderboard",
   "/about",
-  "/login",
-  "/register",
-  "/profile",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

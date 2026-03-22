@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 
@@ -19,6 +20,13 @@ import { buttonVariants } from "@/components/ui/button-variants";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Leaderboard",
+  description:
+    "Top Heardle win streaks on Darktidle — see who’s leading and how your run compares (signed-in players).",
+  alternates: { canonical: "/leaderboard" },
+};
 
 const PAGE_SIZE = 10;
 const MAX_LEADERBOARD = 100;

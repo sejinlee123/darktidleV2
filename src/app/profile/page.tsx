@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -15,6 +16,14 @@ import { DeleteAccountButton } from "@/components/profile/DeleteAccountButton";
 import { ProfileNameForm } from "@/components/profile/ProfileNameForm";
 import { SignOutButton } from "@/components/SignOutButton";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = {
+  title: "Profile",
+  description:
+    "Manage your Darktidle account: display name, sign out, or delete your account.",
+  alternates: { canonical: "/profile" },
+  robots: { index: false, follow: true },
+};
 
 export default async function ProfilePage() {
   const session = await auth.api.getSession({
