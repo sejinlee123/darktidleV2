@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { allQuotes, type Quote } from "@/data/quotes";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   IconDownload,
   IconMusic,
@@ -9,14 +8,24 @@ import {
   IconSearch,
 } from "@/components/mission-icons";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { allQuotes, type Quote } from "@/data/quotes";
+
 export function LibraryView() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeAudio, setActiveAudio] = useState<HTMLAudioElement | null>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const downloadAudio = (filename: string) => {
+  const downloadAudio = (publicPath: string) => {
     const link = document.createElement("a");
-    link.href = `/audio/${filename}`;
-    link.download = filename;
+    link.href = publicPath;
+    link.download = publicPath.split("/").pop() ?? "clip.mp3";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -24,9 +33,10 @@ export function LibraryView() {
 
   useEffect(() => {
     return () => {
-      activeAudio?.pause();
+      activeAudioRef.current?.pause();
+      activeAudioRef.current = null;
     };
-  }, [activeAudio]);
+  }, []);
 
   const quotes = allQuotes as Quote[];
 
@@ -40,19 +50,19 @@ export function LibraryView() {
   }, [searchTerm, quotes]);
 
   const playPreview = (filename: string) => {
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current.currentTime = 0;
     }
-    const next = new Audio(`/audio/${filename}`);
+    const next = new Audio(filename);
     next.play().catch((err) => console.error("Playback failed:", err));
-    setActiveAudio(next);
+    activeAudioRef.current = next;
   };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tighter text-primary drop-shadow-[0_0_10px_rgba(74,222,128,0.2)]">
+        <h1 className="text-3xl font-black tracking-tighter text-primary drop-shadow-[0_0_10px_oklch(0.78_0.19_145_/_0.2)]">
           Vox archive
         </h1>
         <p className="text-sm uppercase tracking-widest text-muted-foreground">
@@ -60,88 +70,98 @@ export function LibraryView() {
         </p>
       </div>
 
-      <div className="relative">
-        <IconSearch className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
-        <input
+      <InputGroup className="h-11! rounded-lg! border-primary/20 bg-card transition-colors focus-within:border-primary/45">
+        <InputGroupAddon>
+          <IconSearch className="size-4 text-muted-foreground" />
+        </InputGroupAddon>
+        <InputGroupInput
           type="search"
           placeholder="Search by quote text or personality…"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-11 w-full rounded-md border border-zinc-800 bg-zinc-950 py-2 pl-10 pr-3 text-sm text-foreground transition-colors placeholder:text-zinc-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          className="h-11 text-sm"
         />
-      </div>
+      </InputGroup>
 
-      <p className="text-[10px] uppercase tracking-tighter text-zinc-500">
+      <p className="text-[10px] uppercase tracking-tighter text-muted-foreground">
         Showing {filteredQuotes.length} transmission logs
       </p>
 
-      <div className="max-h-[min(36rem,70vh)] overflow-y-auto rounded-md border border-zinc-800 bg-black/20 p-4">
-        <div className="space-y-3">
+      <ScrollArea className="h-[min(36rem,70vh)] rounded-lg border border-border bg-muted/20 p-4">
+        <div className="space-y-3 pr-3">
           {filteredQuotes.map((quote) => (
-            <div
+            <Card
               key={quote.id}
-              className="group flex items-center justify-between gap-4 rounded-lg border border-zinc-800 bg-zinc-900/40 p-4 transition-all hover:border-primary/30 hover:bg-zinc-900/60"
+              className="border-border bg-card/50 transition-all hover:border-primary/35 hover:bg-card"
             >
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <span className="rounded border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
-                    {quote.correct.personality}
-                  </span>
-                  <span className="text-[10px] uppercase text-zinc-500">
-                    {quote.correct.class} ({quote.correct.gender})
-                  </span>
+              <CardContent className="flex items-center justify-between gap-4 p-4">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span className="rounded border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
+                      {quote.correct.personality}
+                    </span>
+                    <span className="text-[10px] uppercase text-muted-foreground">
+                      {quote.correct.class} ({quote.correct.gender})
+                    </span>
+                  </div>
+                  <p className="truncate text-sm italic text-card-foreground/90">
+                    &ldquo;{quote.text}&rdquo;
+                  </p>
                 </div>
-                <p className="truncate text-sm italic text-zinc-200 transition-colors group-hover:text-white">
-                  &ldquo;{quote.text}&rdquo;
-                </p>
-              </div>
 
-              <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
-                  onClick={() => playPreview(quote.audio)}
-                  className="flex size-10 items-center justify-center rounded-full bg-zinc-800 text-foreground transition-all hover:bg-primary hover:text-black"
-                  aria-label="Play clip"
-                >
-                  <IconPlay className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => downloadAudio(quote.audio)}
-                  className="flex size-10 items-center justify-center rounded-full bg-zinc-800 text-foreground transition-all hover:bg-primary hover:text-black"
-                  aria-label="Download clip"
-                >
-                  <IconDownload className="size-4" />
-                </button>
-              </div>
-            </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="secondary"
+                    className="rounded-full border border-transparent bg-secondary transition-all hover:border-primary/40 hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary/45"
+                    onClick={() => playPreview(quote.audio)}
+                    aria-label="Play clip"
+                  >
+                    <IconPlay className="size-4 fill-current" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon-sm"
+                    variant="secondary"
+                    className="rounded-full border border-transparent bg-secondary transition-all hover:border-primary/40 hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary/45"
+                    onClick={() => downloadAudio(quote.audio)}
+                    aria-label="Download clip"
+                  >
+                    <IconDownload className="size-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
 
           {filteredQuotes.length === 0 ? (
-            <div className="py-20 text-center text-zinc-600">
-              <IconMusic className="mx-auto mb-4 size-12 opacity-20" />
+            <div className="py-20 text-center text-muted-foreground">
+              <IconMusic className="mx-auto mb-4 size-12 opacity-25" />
               <p className="text-xs uppercase tracking-widest">
                 No matching vox logs found in the warp.
               </p>
             </div>
           ) : null}
         </div>
-      </div>
+      </ScrollArea>
 
-      <div className="rounded border border-primary/10 bg-primary/5 p-4 text-[10px] text-primary/80">
-        <p className="mb-1 font-bold">Data recovery status:</p>
-        <div className="flex flex-wrap gap-4">
-          <span>
-            Veteran: <span className="text-green-500">Complete</span>
-          </span>
-          <span>
-            Zealot: <span className="text-yellow-500">80%</span>
-          </span>
-          <span>
-            Ogryn: <span className="text-red-500">Missing</span>
-          </span>
-        </div>
-      </div>
+      <Card className="border-primary/15 bg-primary/5">
+        <CardContent className="p-4 text-[10px] text-primary/80">
+          <p className="mb-2 font-bold text-primary">Data recovery status:</p>
+          <div className="flex flex-wrap gap-4">
+            <span>
+              Veteran: <span className="text-green-500">Complete</span>
+            </span>
+            <span>
+              Zealot: <span className="text-yellow-500">80%</span>
+            </span>
+            <span>
+              Ogryn: <span className="text-red-500">Missing</span>
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

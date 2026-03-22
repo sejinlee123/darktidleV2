@@ -1,24 +1,62 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-const navItems = [
+import { authClient } from "@/lib/auth-client";
+
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const mainNavItems = [
   { href: "/", label: "Home" },
   { href: "/heardle", label: "Heardle" },
   { href: "/wordle", label: "Wordle" },
   { href: "/library", label: "Library" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/about", label: "About" },
-  { href: "/login", label: "Login" },
-  { href: "/register", label: "Register" },
 ] as const;
 
+const navLinkBase =
+  "rounded-md px-3 py-2 text-sm font-medium transition-[color,background-color,box-shadow] outline-none md:py-1.5";
+
+const navLinkInactive =
+  "text-muted-foreground hover:bg-accent hover:text-accent-foreground";
+
+const navLinkActive =
+  "bg-primary/15 text-primary shadow-[inset_0_0_0_1px] shadow-primary/50 ring-2 ring-primary/35 ring-offset-2 ring-offset-background";
+
+const navLinkFocus =
+  "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
+type NavEntry =
+  | { kind: "link"; href: string; label: string }
+  | { kind: "logout"; label: string };
+
+function buildNavEntries(loggedIn: boolean): NavEntry[] {
+  if (loggedIn) {
+    return [
+      ...mainNavItems.map((i) => ({ kind: "link" as const, ...i })),
+      { kind: "link" as const, href: "/profile", label: "Profile" },
+      { kind: "logout" as const, label: "Log out" },
+    ];
+  }
+  return [
+    ...mainNavItems.map((i) => ({ kind: "link" as const, ...i })),
+    { kind: "link" as const, href: "/login", label: "Login" },
+    { kind: "link" as const, href: "/register", label: "Register" },
+  ];
+}
+
 function NavLinks({
+  entries,
+  onLogout,
   onNavigate,
   className,
 }: {
+  entries: NavEntry[];
+  onLogout: () => void;
   onNavigate?: () => void;
   className?: string;
 }) {
@@ -26,21 +64,44 @@ function NavLinks({
 
   return (
     <ul className={className}>
-      {navItems.map(({ href, label }) => {
-        const active = pathname === href;
+      {entries.map((entry) => {
+        if (entry.kind === "logout") {
+          return (
+            <li key="logout">
+              <button
+                type="button"
+                onClick={() => {
+                  onNavigate?.();
+                  onLogout();
+                }}
+                className={cn(
+                  navLinkBase,
+                  navLinkFocus,
+                  "w-full text-left",
+                  navLinkInactive,
+                )}
+              >
+                {entry.label}
+              </button>
+            </li>
+          );
+        }
+
+        const active = pathname === entry.href;
         return (
-          <li key={href}>
+          <li key={entry.href}>
             <Link
-              href={href}
+              href={entry.href}
               onClick={onNavigate}
-              className={`block rounded-md px-3 py-2 text-sm font-medium transition-colors md:py-1.5 ${
-                active
-                  ? "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-              }`}
+              className={cn(
+                navLinkBase,
+                navLinkFocus,
+                "block",
+                active ? navLinkActive : navLinkInactive,
+              )}
               aria-current={active ? "page" : undefined}
             >
-              {label}
+              {entry.label}
             </Link>
           </li>
         );
@@ -50,16 +111,22 @@ function NavLinks({
 }
 
 export function SiteHeader() {
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const pathname = usePathname();
+
+  const loggedIn = Boolean(session?.user);
+  const entries = buildNavEntries(loggedIn);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
-  useEffect(() => {
-    closeMenu();
-  }, [pathname, closeMenu]);
+  const handleLogout = useCallback(async () => {
+    await authClient.signOut();
+    router.push("/login");
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -74,27 +141,39 @@ export function SiteHeader() {
   }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 dark:border-zinc-800/80">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="shrink-0 text-lg font-semibold tracking-tight text-foreground"
+          className={cn(
+            "shrink-0 text-lg font-semibold tracking-tight text-primary",
+            "drop-shadow-[0_0_12px_oklch(0.78_0.19_145_/_0.35)]",
+            "transition-[color,filter] hover:text-primary/90 hover:drop-shadow-[0_0_14px_oklch(0.78_0.19_145_/_0.45)]",
+            "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          )}
         >
           Darktidle
         </Link>
 
-        <nav
-          className="hidden md:block"
-          aria-label="Main"
-        >
-          <NavLinks className="flex flex-wrap items-center justify-end gap-1" />
+        <nav className="hidden md:block" aria-label="Main">
+          {isPending ? (
+            <div className="h-8 w-32 animate-pulse rounded-md bg-muted/60" />
+          ) : (
+            <NavLinks
+              entries={entries}
+              onLogout={handleLogout}
+              className="flex flex-wrap items-center justify-end gap-1"
+            />
+          )}
         </nav>
 
         <div className="flex items-center md:hidden">
-          <button
+          <Button
             ref={buttonRef}
             type="button"
-            className="inline-flex items-center justify-center rounded-md border border-zinc-300 bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+            variant="outline"
+            size="icon"
+            className="shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-expanded={menuOpen}
             aria-controls={menuId}
             aria-haspopup="true"
@@ -133,18 +212,20 @@ export function SiteHeader() {
                 />
               </svg>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
       {menuOpen ? (
         <div
           id={menuId}
-          className="border-t border-zinc-200 px-4 py-3 shadow-lg dark:border-zinc-800 md:hidden"
+          className="border-t border-border bg-background px-4 py-3 shadow-lg md:hidden"
           role="navigation"
           aria-label="Main"
         >
           <NavLinks
+            entries={entries}
+            onLogout={handleLogout}
             onNavigate={closeMenu}
             className="flex flex-col gap-0.5"
           />

@@ -1,0 +1,56 @@
+{
+  "_readme": "Maps Darktide_Voices folder + variant letter → class/personality. Regenerate clips: node scripts/generate-voice-manifest.mjs",
+  "version": 2,
+  "assetBase": "/Darktide_Voices",
+  "placeholderText": "Placeholder",
+  "archetypes": {
+    "Arbites": {
+      "displayClass": "Arbitrator",
+      "variants": {
+        "A": { "personality": "Authoritarian", "label": "Arbitrator: Authoritarian" },
+        "B": { "personality": "Maul", "label": "Arbitrator: Maul" },
+        "C": { "personality": "Fatalist", "label": "Arbitrator: Fatalist" }
+      }
+    },
+    "Veteran": {
+      "displayClass": "Veteran",
+      "variants": {
+        "A": { "personality": "Professional", "label": "Veteran: Professional" },
+        "B": { "personality": "Loose Cannon", "label": "Veteran: Loose Cannon" },
+        "C": { "personality": "CutThroat", "label": "Veteran: Cutthroat" }
+      }
+    },
+    "Zealot": {
+      "displayClass": "Zealot",
+      "variants": {
+        "A": { "personality": "Judge", "label": "Zealot: Judge" },
+        "B": { "personality": "Agitator", "label": "Zealot: Agitator" },
+        "C": { "personality": "Fanatic", "label": "Zealot: Fanatic" }
+      }
+    },
+    "Psyker": {
+      "displayClass": "Psyker",
+      "variants": {
+        "A": { "personality": "Savant", "label": "Psyker: Savant" },
+        "B": { "personality": "Loner", "label": "Psyker: Loner" },
+        "C": { "personality": "Seer", "label": "Psyker: Seer" }
+      }
+    },
+    "Ogryn": {
+      "displayClass": "Ogryn",
+      "variants": {
+        "A": { "personality": "Bodyguard", "label": "Ogryn: Bodyguard" },
+        "B": { "personality": "Brawler", "label": "Ogryn: Brawler" },
+        "C": { "personality": "Bully", "label": "Ogryn: Bully" }
+      }
+    },
+    "Scum": {
+      "displayClass": "Hive Scum",
+      "variants": {
+        "A": { "personality": "Anarchist", "label": "Hive Scum: Anarchist" },
+        "B": { "personality": "Scrapper", "label": "Hive Scum: Scrapper" },
+        "C": { "personality": "Ganger", "label": "Hive Scum: Ganger" }
+      }
+    }
+  }
+}

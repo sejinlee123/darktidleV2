@@ -1,16 +1,44 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { allQuotes, type Quote } from "@/data/quotes";
-import { GuessInput, type Guess } from "@/components/heardle/GuessInput";
 import { IconAudioLines, IconPlay } from "@/components/mission-icons";
+
+import { GuessInput, type Guess } from "@/components/heardle/GuessInput";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { allQuotes, type Quote } from "@/data/quotes";
+import { cn } from "@/lib/utils";
 
 type GameStatus = "playing" | "won" | "lost";
 
 const maxAttempts = 7;
 
+const transmissionCardClass =
+  "border-2 border-primary/25 bg-card/80 shadow-2xl backdrop-blur-md ring-1 ring-primary/10";
+
+const winCardClass = cn(
+  transmissionCardClass,
+  "border-green-500/45 ring-green-500/20 shadow-[0_0_28px_-6px_rgba(34,197,94,0.22)]",
+);
+
+const loseCardClass = cn(
+  transmissionCardClass,
+  "border-red-500/40 ring-red-500/20 shadow-[0_0_28px_-6px_rgba(239,68,68,0.18)]",
+);
+
+function pickRandomQuote(): Quote {
+  const quotes = allQuotes;
+  return quotes[Math.floor(Math.random() * quotes.length)]!;
+}
+
 export function HeardleGame() {
-  const [targetQuote, setTargetQuote] = useState<Quote | null>(null);
+  const [targetQuote] = useState<Quote | null>(() => pickRandomQuote());
   const [attempts, setAttempts] = useState<Guess[]>([]);
   const [gameState, setGameState] = useState<GameStatus>("playing");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,10 +46,6 @@ export function HeardleGame() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const quotes = allQuotes;
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]!;
-    setTargetQuote(randomQuote);
-
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -32,7 +56,7 @@ export function HeardleGame() {
 
   useEffect(() => {
     if (!targetQuote) return;
-    audioRef.current = new Audio(`/audio/${targetQuote.audio}`);
+    audioRef.current = new Audio(targetQuote.audio);
     audioRef.current.onended = () => setIsPlaying(false);
     return () => {
       audioRef.current?.pause();
@@ -82,18 +106,18 @@ export function HeardleGame() {
 
   return (
     <div className="mx-auto max-w-xl space-y-6 p-4">
-      <div className="rounded-xl border-2 border-primary/20 bg-black/60 shadow-2xl backdrop-blur-md">
-        <div className="mb-4 border-b border-white/5 px-6 py-4 text-center">
-          <h2 className="text-2xl font-black tracking-[0.3em] text-primary">
+      <Card className={transmissionCardClass}>
+        <CardHeader className="border-b border-border text-center">
+          <CardTitle className="text-2xl font-black tracking-[0.3em] text-primary">
             Vox transmission
-          </h2>
-          <p className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">
+          </CardTitle>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
             Atoma Prime — Segmentum Obscurus
           </p>
-        </div>
+        </CardHeader>
 
-        <div className="flex flex-col items-center gap-6 px-6 pb-6">
-          <div className="flex h-16 w-full items-center justify-center overflow-hidden rounded border border-white/10 bg-zinc-950">
+        <CardContent className="flex flex-col items-center gap-6 pt-6">
+          <div className="flex h-16 w-full items-center justify-center overflow-hidden rounded-md border border-border bg-zinc-950 dark:bg-black/60">
             <div className="flex h-8 items-end gap-1">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div
@@ -110,23 +134,26 @@ export function HeardleGame() {
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={isPlaying}
             onClick={playAudio}
-            className={`flex size-24 items-center justify-center rounded-full border-4 transition-all disabled:opacity-70 ${
+            className={cn(
+              "size-24 rounded-full! border-4 shadow-none transition-all",
+              "focus-visible:ring-[3px] focus-visible:ring-primary/50",
               isPlaying
                 ? "animate-pulse border-primary"
-                : "border-primary/20 hover:border-primary"
-            }`}
+                : "border-primary/25 hover:border-primary hover:bg-primary/5",
+            )}
             aria-label={isPlaying ? "Playing audio" : "Play transmission"}
           >
             {isPlaying ? (
-              <IconAudioLines className="size-8 animate-pulse text-primary" />
+              <IconAudioLines className="size-7 animate-pulse" />
             ) : (
-              <IconPlay className="size-8 text-primary" />
+              <IconPlay className="size-7" />
             )}
-          </button>
+          </Button>
 
           <div className="w-full space-y-2">
             <div className="flex justify-between text-[10px] uppercase tracking-tighter text-muted-foreground">
@@ -135,73 +162,97 @@ export function HeardleGame() {
                 {attempts.length} / {maxAttempts} failed decryptions
               </span>
             </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-white">
-              <div
-                className="h-full bg-red-600 transition-[width] duration-300"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
+            <Progress
+              value={progressPct}
+              className="w-full gap-0 [&_[data-slot=progress-track]]:h-1 [&_[data-slot=progress-track]]:bg-white/20 dark:[&_[data-slot=progress-track]]:bg-white/10 [&_[data-slot=progress-indicator]]:bg-red-600"
+            />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {gameState === "won" ? (
-        <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-6 text-center shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-          <h3 className="mb-1 text-xl font-black tracking-tighter text-green-400">
-            Identified: {targetQuote.correct.personality.toUpperCase()}
-          </h3>
-          <p className="text-xs italic text-green-300/70">
-            &ldquo;The Emperor protects those who listen.&rdquo;
-          </p>
-          <button
-            type="button"
-            onClick={restart}
-            className="mt-4 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-500"
-          >
-            Next assignment
-          </button>
-        </div>
+        <Card className={winCardClass}>
+          <CardHeader className="border-b border-border text-center">
+            <CardTitle className="text-xl font-black tracking-[0.18em] text-green-400 sm:text-2xl sm:tracking-[0.22em]">
+              Identified: {targetQuote.correct.personality.toUpperCase()}
+            </CardTitle>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Link verified // Channel secure
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-6 pt-6 text-center">
+            <p className="max-w-sm text-sm italic text-green-300/90">
+              &ldquo;The Emperor protects those who listen.&rdquo;
+            </p>
+            <Button
+              type="button"
+              className="bg-green-600 text-white hover:bg-green-500 focus-visible:ring-[3px] focus-visible:ring-green-500/50"
+              onClick={restart}
+            >
+              Next assignment
+            </Button>
+          </CardContent>
+        </Card>
       ) : null}
 
       {gameState === "lost" ? (
-        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-6 text-center">
-          <h3 className="mb-1 text-xl font-black text-red-400">Signal lost</h3>
-          <p className="mb-4 text-xs text-red-300/70">
-            The voice was the {targetQuote.correct.personality}.
-          </p>
-          <button
-            type="button"
-            onClick={restart}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-500"
-          >
-            Try again
-          </button>
-        </div>
+        <Card className={loseCardClass}>
+          <CardHeader className="border-b border-border text-center">
+            <CardTitle className="text-xl font-black tracking-[0.25em] text-red-400 sm:text-2xl sm:tracking-[0.3em]">
+              Signal lost
+            </CardTitle>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Transmission terminated // Vox fade
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-6 pt-6 text-center">
+            <p className="max-w-sm text-sm text-red-300/90">
+              The voice was the{" "}
+              <span className="font-semibold text-red-200">
+                {targetQuote.correct.personality}
+              </span>
+              .
+            </p>
+            <Button
+              type="button"
+              variant="destructive"
+              className="focus-visible:ring-[3px] focus-visible:ring-red-500/45"
+              onClick={restart}
+            >
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
       ) : null}
 
       {gameState === "playing" ? (
-        <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-6 text-center shadow-[0_0_15px_rgba(34,197,94,0.2)]">
-          <p className="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Submit identification
-          </p>
-          <div className="mt-4">
+        <Card className={transmissionCardClass}>
+          <CardHeader className="border-b border-border text-center">
+            <CardTitle className="text-xl font-black tracking-[0.2em] text-primary sm:text-2xl sm:tracking-[0.28em]">
+              Submit identification
+            </CardTitle>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+              Decryption terminal // Personality match
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6 pt-6">
             <GuessInput
               onGuess={handleGuess}
               attempts={attempts}
               disabled={isPlaying}
             />
-          </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {attempts.map((g, i) => (
-              <span
-                key={`${g.personality}-${i}`}
-                className="rounded border border-red-500/30 bg-red-500/10 px-2 py-1 text-[10px] text-red-400"
-              >
-                {g.personality} ✕
-              </span>
-            ))}
-          </div>
-        </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {attempts.map((g, i) => (
+                <span
+                  key={`${g.personality}-${i}`}
+                  className="rounded border border-red-500/35 bg-red-500/10 px-2 py-1 text-[10px] text-red-400"
+                >
+                  {g.personality} ✕
+                </span>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );

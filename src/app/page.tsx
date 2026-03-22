@@ -1,16 +1,68 @@
 import Link from "next/link";
+import type { ComponentType } from "react";
+
 import {
   IconAudioLines,
   IconRadio,
   IconShield,
   IconTrophy,
+  IconWordGrid,
 } from "@/components/mission-icons";
+
+import { buttonVariants } from "@/components/ui/button-variants";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+type HomeCard = {
+  href: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  cta: string;
+  icon: ComponentType<{ className?: string }>;
+};
+
+const homeCards: HomeCard[] = [
+  {
+    href: "/heardle",
+    eyebrow: "Audio",
+    title: "Vox Heardle",
+    description:
+      "Listen to a voice line from the hive and guess which personality is speaking—you get seven tries before the vox-link cuts out.",
+    cta: "Play Vox Heardle",
+    icon: IconRadio,
+  },
+  {
+    href: "/wordle",
+    eyebrow: "Words",
+    title: "Lexicon grid",
+    description:
+      "Guess the daily five-letter word in six tries—same rules you know, no vox required.",
+    cta: "Play Wordle",
+    icon: IconWordGrid,
+  },
+  {
+    href: "/library",
+    eyebrow: "Archive",
+    title: "Vox archive",
+    description:
+      "Browse every quote we’ve logged: search by text or personality and replay clips on demand.",
+    cta: "Open archive",
+    icon: IconAudioLines,
+  },
+];
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center space-y-10 py-10">
       <div className="space-y-4 text-center">
-        <h1 className="text-6xl font-black tracking-tighter text-primary drop-shadow-[0_0_15px_rgba(74,222,128,0.3)]">
+        <h1 className="text-6xl font-black tracking-tighter text-primary drop-shadow-[0_0_18px_oklch(0.78_0.19_145_/_0.35)]">
           Darktidle
         </h1>
         <p className="text-sm uppercase tracking-widest text-muted-foreground">
@@ -18,59 +70,71 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid w-full max-w-4xl grid-cols-1 gap-6 px-4 md:grid-cols-2">
-        <div className="group flex flex-col rounded-xl border border-primary/20 bg-zinc-950 transition-all hover:border-primary/50">
-          <div className="flex flex-1 flex-col gap-2 p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight">
-                Daily assignment
-              </h2>
-              <IconRadio className="size-6 text-primary group-hover:animate-pulse" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Decrypt the vox-transmission and identify the agent.
-            </p>
-          </div>
-          <div className="p-6 pt-0">
-            <Link
-              href="/heardle"
-              className="flex h-11 w-full items-center justify-center rounded-md bg-primary text-sm font-bold text-black transition-colors hover:bg-primary/80"
+      <div className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+        {homeCards.map(
+          ({ href, eyebrow, title, description, cta, icon: Icon }) => (
+            <Card
+              key={href}
+              className={cn(
+                "group relative flex min-h-[280px] flex-col overflow-hidden",
+                "border-2 border-primary/20 bg-card/90 bg-gradient-to-b from-card via-card to-muted/15",
+                "shadow-md shadow-black/5 ring-1 ring-primary/10",
+                "transition-[border-color,box-shadow,transform] duration-200",
+                "hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-lg hover:shadow-primary/10 hover:ring-primary/25",
+                "dark:shadow-black/40",
+              )}
             >
-              Initialize mission
-            </Link>
-          </div>
-        </div>
-
-        <div className="group flex flex-col rounded-xl border border-primary/20 bg-zinc-950 transition-all hover:border-primary/50">
-          <div className="flex flex-1 flex-col gap-2 p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold tracking-tight">
-                Vox archive
-              </h2>
-              <IconAudioLines className="size-6 text-primary group-hover:animate-pulse" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Review all vox traffic records.
-            </p>
-          </div>
-          <div className="p-6 pt-0">
-            <Link
-              href="/library"
-              className="flex h-11 w-full items-center justify-center rounded-md bg-primary text-sm font-bold text-black transition-colors hover:bg-primary/80"
-            >
-              Access database
-            </Link>
-          </div>
-        </div>
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+                aria-hidden
+              />
+              <CardHeader className="gap-4 space-y-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80">
+                      {eyebrow}
+                    </p>
+                    <CardTitle className="text-xl font-bold tracking-tight">
+                      {title}
+                    </CardTitle>
+                  </div>
+                  <div
+                    className={cn(
+                      "flex size-11 shrink-0 items-center justify-center rounded-xl",
+                      "bg-primary/10 ring-1 ring-primary/25",
+                      "transition-[background-color,box-shadow] group-hover:bg-primary/15 group-hover:ring-primary/40",
+                    )}
+                  >
+                    <Icon className="size-6 text-primary group-hover:animate-pulse" />
+                  </div>
+                </div>
+                <CardDescription className="text-pretty text-sm leading-relaxed">
+                  {description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="mt-auto pt-2">
+                <Link
+                  href={href}
+                  className={cn(
+                    buttonVariants({ variant: "default", size: "lg" }),
+                    "h-11 w-full font-bold focus-visible:ring-[3px] focus-visible:ring-primary/45",
+                  )}
+                >
+                  {cta}
+                </Link>
+              </CardContent>
+            </Card>
+          ),
+        )}
       </div>
 
-      <div className="flex w-full max-w-2xl flex-wrap justify-center gap-8 border-t border-white/5 pt-8">
+      <div className="flex w-full max-w-2xl flex-wrap justify-center gap-8 border-t border-border pt-8">
         <div className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
-          <IconShield className="size-4 shrink-0" />
+          <IconShield className="size-4 shrink-0 text-primary/80" />
           <span>Active agents: 21</span>
         </div>
         <div className="flex items-center gap-2 text-xs uppercase text-muted-foreground">
-          <IconTrophy className="size-4 shrink-0" />
+          <IconTrophy className="size-4 shrink-0 text-primary/80" />
           <span>Best streak: 5 days</span>
         </div>
       </div>

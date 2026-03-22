@@ -1,4 +1,4 @@
-/** Inline SVGs styled with Tailwind only — no icon library. */
+/** Inline SVGs — same stroke style, Tailwind-friendly `className`. */
 
 export function IconCpu({ className }: { className?: string }) {
   return (
@@ -262,6 +262,84 @@ export function IconMusic({ className }: { className?: string }) {
       <path d="M9 18V5l12-2v13" />
       <circle cx="6" cy="18" r="3" />
       <circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+/** Five letter tiles — Wordle-style grid hint. */
+export function IconWordGrid({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {[0, 1, 2, 3, 4].map((i) => (
+        <rect
+          key={i}
+          x={2.2 + i * 4.1}
+          y="7"
+          width="3.4"
+          height="10"
+          rx="0.6"
+        />
+      ))}
+    </svg>
+  );
+}
+
+export function IconChevronsUpDown({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="m7 15 5 5 5-5" />
+      <path d="m7 9 5-5 5 5" />
+    </svg>
+  );
+}
+
+export function IconCheck({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+export function IconX({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M18 6 6 18M6 6l12 12" />
     </svg>
   );
 }

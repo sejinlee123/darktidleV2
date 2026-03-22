@@ -1,7 +1,9 @@
-import rawData from "./quotes.json";
+import voiceConfig from "./voice-config.json";
+import voiceManifest from "./voice-manifest.json";
 
 export interface Quote {
   id: number | string;
+  /** Public URL path (leading slash), e.g. /Darktide_Voices/Veteran/... */
   audio: string;
   text: string;
   correct: {
@@ -16,44 +18,73 @@ interface Personality {
   label: string;
 }
 
-type QuoteGroup = {
-  meta: { class: string; personality: string; gender: string };
-  audioPrefix: string;
-  quotes: { id: string; suffix: string; text: string }[];
+type VariantConfig = { personality: string; label: string };
+
+type ArchetypeConfig = {
+  displayClass: string;
+  variants: Record<string, VariantConfig>;
 };
 
-export const allQuotes: Quote[] = (rawData as QuoteGroup[]).flatMap((group) =>
-  group.quotes.map((q) => ({
-    id: `${group.meta.personality}-${group.audioPrefix}-${q.id}`,
-    audio: `${group.audioPrefix}_${q.suffix}.mp3`,
-    text: q.text,
-    correct: group.meta,
-  })),
-);
+type VoiceConfigFile = {
+  version: number;
+  assetBase: string;
+  placeholderText: string;
+  archetypes: Record<string, ArchetypeConfig>;
+};
+
+type ManifestEntry = {
+  path: string;
+  folder: string;
+  category: string;
+  variant: string;
+  gender: string;
+  clipIndex: number;
+  /** From local Whisper (see scripts/transcribe_voice_manifest.py); falls back to voice-config placeholder */
+  text?: string;
+};
+
+type VoiceManifestFile = {
+  entries: ManifestEntry[];
+};
+
+const config = voiceConfig as VoiceConfigFile;
+const manifest = voiceManifest as VoiceManifestFile;
+
+const base = config.assetBase.replace(/\/$/, "");
+
+function audioUrl(relativePath: string): string {
+  return `${base}/${relativePath}`.replace(/\/{2,}/g, "/");
+}
+
+const placeholder = config.placeholderText;
+
+export const allQuotes: Quote[] = manifest.entries.flatMap((entry) => {
+  const archetype = config.archetypes[entry.folder];
+  if (!archetype) return [];
+  const v = archetype.variants[entry.variant];
+  if (!v) return [];
+  const q: Quote = {
+    id: `${entry.folder}-${entry.category}-${v.personality}-${entry.gender}-${entry.clipIndex}`,
+    audio: audioUrl(entry.path),
+    text:
+      typeof entry.text === "string" && entry.text.trim() !== ""
+        ? entry.text.trim()
+        : placeholder,
+    correct: {
+      class: archetype.displayClass,
+      personality: v.personality,
+      gender: entry.gender,
+    },
+  };
+  return [q];
+});
 
 export const personalities: Personality[] = [
-  { value: "Professional", label: "Veteran: Professional" },
-  { value: "LooseCannon", label: "Veteran: Loose Cannon" },
-  { value: "CutThroat", label: "Veteran: Cutthroat" },
-
-  { value: "Enforcer", label: "Arbitrator: Enforcer" },
-  { value: "Punisher", label: "Arbitrator: Punisher" },
-  { value: "Nuncio", label: "Arbitrator: Nuncio" },
-
-  { value: "Judge", label: "Zealot: Judge" },
-  { value: "Agitator", label: "Zealot: Agitator" },
-  { value: "Fanatic", label: "Zealot: Fanatic" },
-
-  { value: "Savant", label: "Psyker: Savant" },
-  { value: "Loner", label: "Psyker: Loner" },
-  { value: "Seer", label: "Psyker: Seer" },
-
-  { value: "Bodyguard", label: "Ogryn: Bodyguard" },
-  { value: "Brawler", label: "Ogryn: Brawler" },
-  { value: "Bully", label: "Ogryn: Bully" },
+  ...Object.entries(config.archetypes).flatMap(([, arch]) =>
+    Object.values(arch.variants).map((v) => ({
+      value: v.personality,
+      label: v.label,
+    })),
+  ),
   { value: "Heavy", label: "Ogryn: Heavy" },
-
-  { value: "Anarchist", label: "Hive Scum: Anarchist" },
-  { value: "Scrapper", label: "Hive Scum: Scrapper" },
-  { value: "Ganger", label: "Hive Scum: Ganger" },
 ];

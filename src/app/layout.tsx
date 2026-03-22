@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
+
 import { SiteHeader } from "@/components/SiteHeader";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,8 +33,13 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col font-sans">
+        <Script
+          id="dark-mode-init"
+          strategy="beforeInteractive"
+        >{`try{var m=window.matchMedia("(prefers-color-scheme: dark)");function s(){document.documentElement.classList.toggle("dark",m.matches);}s();m.addEventListener("change",s);}catch(e){}`}</Script>
         <SiteHeader />
         <main className="flex-1 w-full">{children}</main>
       </body>
