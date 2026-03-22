@@ -584,7 +584,7 @@ export function HeardleGame() {
           </CardHeader>
           <CardContent className="space-y-4 pt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              After confessing heresy, this terminal is sealed for{" "}
+              After detecting heresy, this terminal is sealed for{" "}
               <strong className="text-foreground">five minutes</strong>.
             </p>
             <p className="font-mono text-3xl font-black tabular-nums text-amber-500">
@@ -699,11 +699,11 @@ export function HeardleGame() {
         <Card className={loseCardClass}>
           <CardHeader className="border-b border-border text-center">
             <CardTitle className="text-xl font-black tracking-[0.25em] text-red-400 sm:text-2xl sm:tracking-[0.3em]">
-              {gameState === "heresy" ? "Heresy confessed" : "Signal lost"}
+              {gameState === "heresy" ? "Heresy" : "Signal lost"}
             </CardTitle>
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
               {gameState === "heresy"
-                ? "Certainty bought with shame // Streak forfeit"
+                ? "Certainty bought with shame"
                 : "Transmission terminated // Vox fade"}
             </p>
           </CardHeader>
@@ -715,7 +715,7 @@ export function HeardleGame() {
                   <span className="font-semibold text-red-200">
                     {targetQuote.correct.personality}
                   </span>
-                  . Your win streak is void.
+                  .
                 </>
               ) : (
                 <>
