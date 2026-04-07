@@ -13,4 +13,5 @@ A **Darktide**-themed fan site with a **Heardle**-style daily clip game, a **Wor
 
 ## License
 See [LICENSE](LICENSE).
+
 Private / fan project—respect Fatshark’s IP and community guidelines for **Warhammer 40,000: Darktide** content.
